@@ -91,8 +91,19 @@
         .topbar-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1;
+            min-width: 0;
+        }
+        .topbar-left::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
         }
 
         .topbar-brand {
@@ -836,6 +847,72 @@
             cursor: not-allowed;
             transform: none;
         }
+    
+        /* Responsive Desktop Rules */
+        @media (max-width: 1200px) {
+            .topbar-ext-link {
+                display: none !important;
+            }
+        }
+        @media (max-width: 900px) {
+            .topbar-badge-device {
+                display: none !important;
+            }
+        }
+        @media (max-width: 680px) {
+            .topbar-badge-ram {
+                display: none !important;
+            }
+            .topbar-menu-item:not(.highlight-agy):not(.essential-topbar) {
+                display: none !important;
+            }
+        }
+
+        /* Responsive Dock */
+        .dock-container {
+            max-width: calc(100vw - 20px);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .dock-container::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+        @media (max-width: 768px) {
+            .dock-container {
+                bottom: 8px;
+                padding: 6px 10px;
+                gap: 8px;
+                border-radius: 16px;
+            }
+            .dock-item {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+        }
+
+        /* Window boundary guard */
+        .window {
+            max-width: calc(100vw - 16px);
+            max-height: calc(100vh - 44px);
+        }
+        .agy-chat-container {
+            flex: 1 1 0%;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .agy-messages {
+            flex: 1 1 0%;
+            min-height: 0;
+        }
+        .agy-input-container {
+            flex-shrink: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -855,15 +932,15 @@
             <div class="topbar-menu-item" onclick="toggleWindow('win-files')"><i class="fa-solid fa-folder-tree mr-1"></i> Files</div>
             <div class="topbar-menu-item" onclick="toggleWindow('win-sys')"><i class="fa-solid fa-gauge-high mr-1"></i> Monitor</div>
             <div class="topbar-menu-item" onclick="toggleWindow('win-gopay')"><i class="fa-solid fa-qrcode mr-1"></i> GoPay QRIS</div>
-            <div class="topbar-menu-item" onclick="window.open('https://openqris.jokicoding.web.id', '_blank')"><i class="fa-solid fa-bolt mr-1"></i> OpenQRIS</div>
-            <div class="topbar-menu-item" onclick="window.open('https://openjob.jokicoding.web.id', '_blank')"><i class="fa-solid fa-briefcase mr-1"></i> OpenJob</div>
-            <div class="topbar-menu-item" onclick="window.open('https://openjurnal.jokicoding.web.id', '_blank')"><i class="fa-solid fa-graduation-cap mr-1"></i> OpenJurnal</div>
-            <div class="topbar-menu-item" onclick="window.open('https://openplag.jokicoding.web.id', '_blank')"><i class="fa-solid fa-book-open mr-1"></i> OpenPlag</div>
-            <div class="topbar-menu-item" onclick="window.open('https://openstalker.jokicoding.web.id', '_blank')"><i class="fa-solid fa-user-secret text-emerald-400 mr-1"></i> OpenStalker</div>
+            <div class="topbar-menu-item topbar-ext-link" onclick="window.open('https://openqris.jokicoding.web.id', '_blank')"><i class="fa-solid fa-bolt mr-1"></i> OpenQRIS</div>
+            <div class="topbar-menu-item topbar-ext-link" onclick="window.open('https://openjob.jokicoding.web.id', '_blank')"><i class="fa-solid fa-briefcase mr-1"></i> OpenJob</div>
+            <div class="topbar-menu-item topbar-ext-link" onclick="window.open('https://openjurnal.jokicoding.web.id', '_blank')"><i class="fa-solid fa-graduation-cap mr-1"></i> OpenJurnal</div>
+            <div class="topbar-menu-item topbar-ext-link" onclick="window.open('https://openplag.jokicoding.web.id', '_blank')"><i class="fa-solid fa-book-open mr-1"></i> OpenPlag</div>
+            <div class="topbar-menu-item topbar-ext-link" onclick="window.open('https://openstalker.jokicoding.web.id', '_blank')"><i class="fa-solid fa-user-secret text-emerald-400 mr-1"></i> OpenStalker</div>
         </div>
         <div class="topbar-right">
-            <div class="sys-badge"><i class="fa-solid fa-mobile-screen"></i> Redmi Note 9 (merlin)</div>
-            <div class="sys-badge"><i class="fa-solid fa-memory"></i> RAM: <span id="topbar-ram">Loading...</span></div>
+            <div class="sys-badge topbar-badge-device"><i class="fa-solid fa-mobile-screen"></i> Redmi Note 9</div>
+            <div class="sys-badge topbar-badge-ram"><i class="fa-solid fa-memory"></i> RAM: <span id="topbar-ram">Loading...</span></div>
             <div class="sys-badge" id="topbar-clock">00:00:00</div>
         </div>
     </div>
@@ -1146,6 +1223,57 @@
             win.addEventListener('mousedown', () => bringToFront(win.id));
         });
 
+        
+        function initResponsiveWindows() {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            const agyWin = document.getElementById('win-antigravity');
+            if (agyWin && !agyWin.dataset.userMoved && agyWin.dataset.maximized !== 'true') {
+                if (vw <= 768) {
+                    agyWin.style.top = '36px';
+                    agyWin.style.left = '8px';
+                    agyWin.style.width = (vw - 16) + 'px';
+                    agyWin.style.height = Math.max(380, vh - 105) + 'px';
+                } else {
+                    const width = Math.min(880, Math.max(480, vw - 60));
+                    const height = Math.min(560, Math.max(380, vh - 125));
+                    const left = Math.max(16, Math.floor((vw - width) / 2));
+                    const top = Math.max(38, Math.floor((vh - 80 - height) / 2));
+                    agyWin.style.top = top + 'px';
+                    agyWin.style.left = left + 'px';
+                    agyWin.style.width = width + 'px';
+                    agyWin.style.height = height + 'px';
+                }
+            }
+
+            const termWin = document.getElementById('win-term');
+            if (termWin && !termWin.dataset.userMoved && termWin.dataset.maximized !== 'true') {
+                if (vw <= 768) {
+                    termWin.style.top = '36px';
+                    termWin.style.left = '8px';
+                    termWin.style.width = (vw - 16) + 'px';
+                    termWin.style.height = Math.max(380, vh - 105) + 'px';
+                } else {
+                    const width = Math.min(840, Math.max(460, vw - 100));
+                    const height = Math.min(500, Math.max(340, vh - 145));
+                    const left = Math.max(20, Math.floor((vw - width) / 2) - 25);
+                    const top = Math.max(42, Math.floor((vh - 80 - height) / 2) - 15);
+                    termWin.style.top = top + 'px';
+                    termWin.style.left = left + 'px';
+                    termWin.style.width = width + 'px';
+                    termWin.style.height = height + 'px';
+                }
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            initResponsiveWindows();
+        });
+        window.addEventListener('DOMContentLoaded', () => {
+            initResponsiveWindows();
+        });
+
         function startDrag(e, winId) {
             bringToFront(winId);
             draggedWin = document.getElementById(winId);
@@ -1210,7 +1338,7 @@
                 win.style.top = '32px';
                 win.style.left = '0';
                 win.style.width = '100vw';
-                win.style.height = 'calc(100vh - 32px)';
+                win.style.height = 'calc(100vh - 32px - 72px)';
                 win.dataset.maximized = 'true';
             }
         }
