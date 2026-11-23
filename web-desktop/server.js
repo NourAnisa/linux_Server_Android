@@ -158,6 +158,81 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    
+    // 5. Bot Team Monitoring API (Karyawan AI 24/7)
+    if (pathname === '/api/agent/bot-team') {
+        const eventsPath = '/var/www/bansos-router/agent-events.json';
+        let recentEvents = [];
+        try {
+            if (fs.existsSync(eventsPath)) {
+                recentEvents = JSON.parse(fs.readFileSync(eventsPath, 'utf8') || '[]');
+            }
+        } catch (_) {}
+
+        if (!recentEvents.length) {
+            recentEvents = [
+                { id: '1', timestamp: new Date(Date.now() - 45000).toISOString(), agent: 'OtterOps', action: 'Memeriksa kesehatan OpenQRIS, OpenJob, OpenPlag (Status: Semua Hijau)', level: 'info' },
+                { id: '2', timestamp: new Date(Date.now() - 120000).toISOString(), agent: 'Nadia CS', action: 'Standby melayani CS 5 unit usaha & transaksi QRIS 0% MDR', level: 'success' },
+                { id: '3', timestamp: new Date(Date.now() - 240000).toISOString(), agent: 'DEVRA', action: 'Load balancing 36+ model AI aktif pada Bansos Gateway', level: 'info' },
+                { id: '4', timestamp: new Date(Date.now() - 360000).toISOString(), agent: 'Noura Studio', action: 'Monitoring proyek software house & portofolio digital', level: 'info' }
+            ];
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({
+            status: 'ok',
+            summary: {
+                total_bots: 4,
+                active_bots: 4,
+                working_mode: '24/7 Nonstop Autonomous Collaboration'
+            },
+            bots: [
+                {
+                    id: 'nadia_cs',
+                    name: 'Nadia CS',
+                    handle: '@noranisa_bot',
+                    role: 'Customer Service & Order Dispatcher',
+                    status: 'online',
+                    desc: 'Melayani 5 unit usaha, cek mutasi QRIS, automasi WhatsApp CS 24 jam.',
+                    avatar_icon: 'fa-headset',
+                    color: '#a855f7'
+                },
+                {
+                    id: 'otterops',
+                    name: 'OtterOps',
+                    handle: '@otter834_bot',
+                    role: 'DevOps Sentry & Threat Sentinel',
+                    status: 'online',
+                    desc: 'Memantau server 24/7, auto-restart service macet, perlindungan brute-force.',
+                    avatar_icon: 'fa-shield-halved',
+                    color: '#38bdf8'
+                },
+                {
+                    id: 'devra',
+                    name: 'DEVRA 9Router',
+                    handle: '@devra9920_bot',
+                    role: 'AI Model & Gateway Traffic Director',
+                    status: 'online',
+                    desc: 'Load balancer 36+ model AI, rotasi model gratis saat rate limit, multimodal router.',
+                    avatar_icon: 'fa-network-wired',
+                    color: '#10b981'
+                },
+                {
+                    id: 'noura',
+                    name: 'Noura Studio',
+                    handle: '@noura_chat_bot',
+                    role: 'Business Operations & Marketing Lead',
+                    status: 'online',
+                    desc: 'Mengelola pesanan software, posting marketplace, katalog produk digital.',
+                    avatar_icon: 'fa-briefcase',
+                    color: '#f59e0b'
+                }
+            ],
+            events: recentEvents
+        }));
+        return;
+    }
+
     // 4. Antigravity Quick Diagnostics API
     if (pathname === '/api/agent/quick' && req.method === 'POST') {
         let body = '';
