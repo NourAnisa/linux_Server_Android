@@ -15,7 +15,7 @@ const FALLBACK_MODELS = [
     'kilo-auto/free'
 ];
 
-const SYSTEM_PROMPT = `Anda adalah Antigravity, asisten AI otonom rekayasa perangkat lunak dan manajemen server tingkat lanjut di server TinyCore Linux (Redmi Note 9 ARM64).
+const SYSTEM_PROMPT = `Anda adalah JokiCoding AI, asisten AI otonom rekayasa perangkat lunak dan manajemen server tingkat lanjut di server TinyCore Linux (Redmi Note 9 ARM64).
 Anda memiliki akses dan wewenang penuh untuk memeriksa sistem, mendiagnosis masalah, mengedit kode, dan mengelola semua service di /var/www:
 1. /var/www/openqris (Port 5060) - SaaS Payment Gateway 0% MDR (Node 22, SQLite, GoBiz poller, Snap UI).
 2. /var/www/gopay-gateway (Port 3005) - GoBiz QRIS internal gateway (Bit & Bean).
@@ -266,7 +266,7 @@ async function callLLM(messages, preferredModel = DEFAULT_MODEL) {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${BANSOS_API_KEY}`,
-                    'User-Agent': 'Antigravity-Agent/1.0'
+                    'User-Agent': 'JokiCoding-AI-Agent/1.0'
                 },
                 body: JSON.stringify({
                     model: model,

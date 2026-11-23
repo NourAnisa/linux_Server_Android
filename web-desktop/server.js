@@ -94,7 +94,7 @@ const server = http.createServer((req, res) => {
                     return;
                 }
 
-                console.log(`[Antigravity Chat] Prompt (${messages.length} msgs), model: ${model}`);
+                console.log(`[JokiCoding AI Chat] Prompt (${messages.length} msgs), model: ${model}`);
                 const result = await agent.runAgentTurn({
                     messages,
                     model
@@ -108,7 +108,7 @@ const server = http.createServer((req, res) => {
                     model: result.model
                 }));
             } catch (err) {
-                console.error('[Antigravity Chat Error]', err);
+                console.error('[JokiCoding AI Chat Error]', err);
                 res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
                 res.end(JSON.stringify({
                     status: 'error',
@@ -296,5 +296,5 @@ server.on('upgrade', (req, socket, head) => {
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`[TinyCore GUI Desktop] Running on port ${PORT}`);
     console.log(`[TinyCore GUI Desktop] Terminal Backend (ttyd): port ${TTYD_PORT}`);
-    console.log(`[TinyCore GUI Desktop] Antigravity AI Assistant active: /api/agent/chat`);
+    console.log(`[TinyCore GUI Desktop] JokiCoding AI Assistant active: /api/agent/chat`);
 });
