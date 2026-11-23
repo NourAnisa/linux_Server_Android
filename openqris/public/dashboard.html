@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenQRIS — Merchant & Developer Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        .glass-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); }
+        .tab-btn.active { background: #4f46e5; color: #ffffff; }
+    </style>
+    <link rel="icon" type="image/png" href="/icon.png?v=4">
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white bg-slate-50">
+
+    <!-- Auth Modal Overlay (If not logged in) -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl p-6 sm:p-8 relative shadow-2xl border border-slate-200">
+            <div class="text-center mb-6">
+                <img src="/logo.png?v=4" alt="OpenQRIS.id" class="h-14 sm:h-16 mx-auto mb-3 object-contain">
+                <h2 id="auth-title" class="text-2xl font-black text-slate-900">Masuk ke OpenQRIS</h2>
+                <p id="auth-subtitle" class="text-xs text-slate-500 mt-1">Kelola Kunci API & Pengaturan Merchant GoBiz Anda</p>
+            </div>
+
+            <!-- Tab Auth Selector (Masuk / Daftar) -->
+            <div class="flex p-1 bg-slate-100 rounded-2xl border border-slate-200 mb-6 text-xs font-bold">
+                <button type="button" onclick="switchAuthTab('login')" id="auth-tab-login" class="w-1/2 py-2 rounded-xl transition bg-indigo-600 text-white shadow">
+                    Masuk
+                </button>
+                <button type="button" onclick="switchAuthTab('register')" id="auth-tab-register" class="w-1/2 py-2 rounded-xl transition text-slate-500 hover:text-slate-900">
+                    Daftar Akun Baru
+                </button>
+            </div>
+
+            <!-- 1. Form Login -->
+            <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Email</label>
+                    <input type="email" id="login-email" placeholder="nama@email.com" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+                    <input type="password" id="login-pwd" placeholder="••••••••" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+                
+                <button type="submit" id="btn-login-submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/25 transition active:scale-[0.98]">
+                    Masuk Sekarang
+                </button>
+
+                <p class="text-center text-xs text-slate-500 pt-2">
+                    Belum punya akun? <a href="javascript:void(0)" onclick="switchAuthTab('register')" class="text-indigo-600 font-bold hover:underline">Daftar Akun Baru</a>
+                </p>
+            </form>
+
+            <!-- 2. Form Register -->
+            <form id="form-register" onsubmit="handleRegister(event)" class="space-y-3 hidden">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Lengkap / Nama Bisnis</label>
+                    <input type="text" id="reg-name" placeholder="Contoh: Toko Kopi Sejahtera" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Email Aktif</label>
+                    <input type="email" id="reg-email" placeholder="owner@tokokopi.com" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor WhatsApp (Untuk Notifikasi)</label>
+                    <input type="tel" id="reg-whatsapp" placeholder="081234567890" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Password</label>
+                        <input type="password" id="reg-pwd" placeholder="Min. 6 Karakter" minlength="6" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Ulangi Password</label>
+                        <input type="password" id="reg-pwd-confirm" placeholder="Konfirmasi" minlength="6" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="btn-register-submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/25 transition active:scale-[0.98]">
+                        Daftar Akun Baru (0% MDR)
+                    </button>
+                </div>
+
+                <p class="text-center text-xs text-slate-500 pt-2">
+                    Sudah punya akun? <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-indigo-600 font-bold hover:underline">Masuk di sini</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard UI -->
+    <div id="dashboard-app" class="hidden">
+        
+        <!-- Navbar -->
+        <header class="border-b border-slate-200 bg-white/90 sticky top-0 z-40 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <a href="/" class="flex items-center"><img src="/logo.png?v=4" alt="OpenQRIS.id" class="h-8 sm:h-9 object-contain"></a>
+                    <div>
+                        <span class="text-sm font-extrabold text-slate-900">OpenQRIS Merchant</span>
+                        <span class="text-[10px] ml-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200" id="user-plan-badge">Enterprise 0% MDR</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4 text-xs">
+                    <span class="text-slate-600 hidden sm:inline" id="user-name-display">Merchant</span>
+                    <button onclick="logout()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-semibold transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Container -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            
+            <!-- Stats Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-box p-5 rounded-2xl">
+                    <span class="text-slate-500 text-xs font-semibold">Total Omset Lunas</span>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1" id="stat-volume">Rp 0</h3>
+                    <p class="text-[11px] text-emerald-600 mt-1 flex items-center"><i class="fa-solid fa-arrow-up mr-1"></i> 100% Masuk ke Rekening Anda</p>
+                </div>
+
+                <div class="glass-box p-5 rounded-2xl">
+                    <span class="text-slate-500 text-xs font-semibold">Transaksi Sukses</span>
+                    <h3 class="text-2xl font-black text-slate-900 mt-1" id="stat-settled">0</h3>
+                    <p class="text-[11px] text-slate-500 mt-1">Settlement real-time</p>
+                </div>
+
+                <div class="glass-box p-5 rounded-2xl">
+                    <span class="text-slate-500 text-xs font-semibold">Transaksi Pending</span>
+                    <h3 class="text-2xl font-black text-amber-600 mt-1" id="stat-pending">0</h3>
+                    <p class="text-[11px] text-slate-500 mt-1">Menunggu pembayaran</p>
+                </div>
+
+                <div class="glass-box p-5 rounded-2xl">
+                    <span class="text-slate-500 text-xs font-semibold">Biaya Potongan MDR</span>
+                    <h3 class="text-2xl font-black text-emerald-600 mt-1">Rp 0</h3>
+                    <p class="text-[11px] text-indigo-600 mt-1">0% Komisi / Gratis</p>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2 text-xs font-bold">
+                <button onclick="switchTab('keys')" id="tab-btn-keys" class="tab-btn active px-4 py-2 rounded-xl transition">
+                    <i class="fa-solid fa-key mr-1.5"></i> Kunci API Midtrans
+                </button>
+                <button onclick="switchTab('gobiz')" id="tab-btn-gobiz" class="tab-btn px-4 py-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-store mr-1.5"></i> Hubungkan GoBiz (BYOM)
+                </button>
+                <button onclick="switchTab('webhook')" id="tab-btn-webhook" class="tab-btn px-4 py-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-satellite-dish mr-1.5"></i> Webhook & Notifikasi
+                </button>
+                <button onclick="switchTab('transactions')" id="tab-btn-transactions" class="tab-btn px-4 py-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-list-check mr-1.5"></i> Riwayat Transaksi
+                </button>
+            </div>
+
+            <!-- Tab 1: API Keys -->
+            <div id="tab-content-keys" class="space-y-6">
+                <div class="glass-box p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Kredensial API (Production Environment)</h3>
+                            <p class="text-xs text-slate-500">Gunakan kredensial ini di SDK atau backend e-commerce Anda.</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200">Active</span>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Client Key</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" id="key-client" readonly class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-800 focus:outline-none">
+                                <button onclick="copyField('key-client')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition">Salin</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Server Key</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="password" id="key-server" readonly class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-800 focus:outline-none">
+                                <button onclick="toggleVisibility('key-server')" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 rounded-xl text-xs font-semibold transition"><i class="fa-regular fa-eye"></i></button>
+                                <button onclick="copyField('key-server')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition">Salin</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">API Base URL</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" value="https://openqris.jokicoding.web.id/api" readonly class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-indigo-600 focus:outline-none font-semibold">
+                                <button onclick="navigator.clipboard.writeText('https://openqris.jokicoding.web.id/api'); alert('Base URL disalin!')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition">Salin</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: GoBiz BYOM Settings -->
+            <div id="tab-content-gobiz" class="hidden space-y-6">
+                <div class="glass-box p-6 rounded-3xl space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Pengaturan Akun Merchant GoBiz (Model BYOM)</h3>
+                        <p class="text-xs text-slate-500 mt-1">OpenQRIS menghubungkan GoBiz Merchant Anda secara langsung sehingga setiap pembayaran masuk ke rekening toko Anda tanpa potongan perantara.</p>
+                    </div>
+
+                    <form onsubmit="saveMerchantSettings(event)" class="space-y-4 pt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Toko / Outlet</label>
+                                <input type="text" id="merchant-store-name" placeholder="Contoh: Toko Kopi Sejahtera" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">GoPay Merchant ID</label>
+                                <input type="text" id="merchant-id-input" placeholder="Contoh: G561368839" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">String QRIS Statis Merchant (EMVCo)</label>
+                            <textarea id="merchant-qris-static" rows="3" placeholder="00020101021126610014COM.GO-JEK.WWW..." class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"></textarea>
+                            <p class="text-[11px] text-slate-500 mt-1">Dapatkan string ini dengan cara scan QRIS PDF / stiker GoBiz Anda di aplikasi pembaca QR.</p>
+                        </div>
+
+                        <!-- Mode Layanan API: Dedicated BYOM -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Mode Layanan API</label>
+                            <div class="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-start space-x-3">
+                                <div class="mt-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 shrink-0"></div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-slate-900">Dedicated API Provider (BYOM: Bring Your Own Merchant)</span>
+                                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">0% MDR</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                                        OpenQRIS bertindak sebagai penyedia API Gateway murni. Seluruh pembayaran dari QRIS dinamis langsung masuk 100% utuh detik itu juga ke rekening GoBiz Anda sendiri tanpa perantara / penahanan saldo.
+                                    </p>
+                                </div>
+                            </div>
+                            <input type="hidden" id="merchant-mode-select" value="dedicated">
+                        </div>
+
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/25 transition">
+                            Simpan Pengaturan Merchant
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab 3: Webhook -->
+            <div id="tab-content-webhook" class="hidden space-y-6">
+                <div class="glass-box p-6 rounded-3xl space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Pengaturan Webhook Notifikasi Real-Time</h3>
+                        <p class="text-xs text-slate-500 mt-1">Setiap kali pelanggan sukses membayar, sistem akan mengirimkan HTTP POST event JSON lengkap dengan Signature HMAC-SHA512.</p>
+                    </div>
+
+                    <form onsubmit="saveWebhookSettings(event)" class="space-y-4 pt-2">
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Target Webhook URL</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="url" id="webhook-url-input" placeholder="https://tokoanda.com/api/payment-notification" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition whitespace-nowrap">Simpan URL</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="pt-4 border-t border-slate-200">
+                        <button onclick="testWebhookPing()" id="btn-test-webhook" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-indigo-700 border border-slate-200 text-xs font-bold transition flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                            <span>Kirim Uji Coba Webhook (Ping Test)</span>
+                        </button>
+                        <p id="test-webhook-msg" class="text-xs mt-2 text-slate-500"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Transactions History -->
+            <div id="tab-content-transactions" class="hidden space-y-6">
+                <div class="glass-box p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-900">Daftar Transaksi Terbaru</h3>
+                        <button onclick="refreshDashboard()" class="text-xs text-slate-500 hover:text-slate-800"><i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider bg-slate-50">
+                                    <th class="py-2.5 px-3">Order ID</th>
+                                    <th class="py-2.5 px-3">Customer</th>
+                                    <th class="py-2.5 px-3">Nominal</th>
+                                    <th class="py-2.5 px-3">Status</th>
+                                    <th class="py-2.5 px-3">Waktu</th>
+                                    <th class="py-2.5 px-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-tbody" class="divide-y divide-slate-100 font-mono text-slate-700">
+                                <tr>
+                                    <td colspan="6" class="py-4 text-center text-slate-400 font-sans">Memuat data transaksi...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="border-t border-slate-200 bg-white py-6 text-slate-500 text-xs mt-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <img src="/logo.png?v=4" alt="OpenQRIS.id" class="h-7 object-contain">
+                    <span class="text-[11px] text-slate-400 border-l border-slate-200 pl-3">API Payment Gateway QRIS Dinamis 0% MDR</span>
+                </div>
+                <div class="flex items-center space-x-6 text-slate-500">
+                    <a href="/docs" class="hover:text-indigo-600 transition">Dokumentasi API</a>
+                    <a href="/demo" class="hover:text-indigo-600 transition">Simulator</a>
+                    <a href="https://t.me/noranisa_bot" target="_blank" class="hover:text-sky-600 transition"><i class="fa-brands fa-telegram mr-1"></i> Bantuan</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let authToken = localStorage.getItem('openqris_auth_token');
+        let currentData = null;
+
+        function switchAuthTab(tab) {
+            const loginBtn = document.getElementById('auth-tab-login');
+            const regBtn = document.getElementById('auth-tab-register');
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+
+            if (tab === 'register') {
+                loginBtn.className = 'w-1/2 py-2 rounded-xl transition text-slate-500 hover:text-slate-900';
+                regBtn.className = 'w-1/2 py-2 rounded-xl transition bg-indigo-600 text-white shadow';
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                title.innerText = 'Daftar OpenQRIS';
+                subtitle.innerText = 'Nikmati Payment Gateway QRIS Dinamis 0% Komisi MDR';
+            } else {
+                regBtn.className = 'w-1/2 py-2 rounded-xl transition text-slate-500 hover:text-slate-900';
+                loginBtn.className = 'w-1/2 py-2 rounded-xl transition bg-indigo-600 text-white shadow';
+                regForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                title.innerText = 'Masuk ke OpenQRIS';
+                subtitle.innerText = 'Kelola Kunci API & Pengaturan Merchant GoBiz Anda';
+            }
+        }
+
+        async function init() {
+            if (window.location.hash === '#register') {
+                switchAuthTab('register');
+            }
+
+            if (!authToken) {
+                document.getElementById('auth-modal').classList.remove('hidden');
+                document.getElementById('dashboard-app').classList.add('hidden');
+            } else {
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.getElementById('dashboard-app').classList.remove('hidden');
+                await refreshDashboard();
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-pwd').value;
+            const btn = document.getElementById('btn-login-submit');
+
+            btn.disabled = true;
+            btn.innerText = 'Memverifikasi...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert(data.message || 'Email atau password salah.');
+                    return;
+                }
+
+                authToken = data.token;
+                localStorage.setItem('openqris_auth_token', authToken);
+                init();
+            } catch (err) {
+                alert('Gagal menghubungi server: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Masuk Sekarang';
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const whatsapp = document.getElementById('reg-whatsapp').value.trim();
+            const password = document.getElementById('reg-pwd').value;
+            const confirmPwd = document.getElementById('reg-pwd-confirm').value;
+            const btn = document.getElementById('btn-register-submit');
+
+            if (password !== confirmPwd) {
+                alert('Konfirmasi password tidak sesuai.');
+                return;
+            }
+            if (password.length < 6) {
+                alert('Password minimal 6 karakter.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Membuat Akun Baru...';
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, whatsapp, password })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    alert(data.message || 'Registrasi gagal.');
+                    return;
+                }
+
+                authToken = data.token;
+                localStorage.setItem('openqris_auth_token', authToken);
+                alert('🎉 Pendaftaran Berhasil! Selamat datang di OpenQRIS, ' + data.user.name + '.');
+                init();
+            } catch (err) {
+                alert('Gagal mendaftar: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Daftar Akun Baru (0% MDR)';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('openqris_auth_token');
+            authToken = null;
+            init();
+        }
+
+        async function refreshDashboard() {
+            try {
+                const res = await fetch('/api/dashboard/overview', {
+                    headers: { 'x-auth-token': authToken }
+                });
+                const json = await res.json();
+                if (!json.success) {
+                    logout();
+                    return;
+                }
+
+                currentData = json.data;
+                renderDashboard(currentData);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderDashboard(data) {
+            document.getElementById('user-name-display').innerText = data.user.name;
+            document.getElementById('user-plan-badge').innerText = (data.user.plan || 'Free').toUpperCase() + ' • 0% MDR';
+
+            // Stats
+            document.getElementById('stat-volume').innerText = 'Rp ' + Number(data.stats.settled_volume || 0).toLocaleString('id-ID');
+            document.getElementById('stat-settled').innerText = data.stats.settled_count || 0;
+            document.getElementById('stat-pending').innerText = data.stats.pending_count || 0;
+
+            // API Keys
+            const prodKey = data.keys.find(k => k.environment === 'production') || data.keys[0];
+            if (prodKey) {
+                document.getElementById('key-client').value = prodKey.client_key;
+                document.getElementById('key-server').value = prodKey.server_key;
+                document.getElementById('webhook-url-input').value = prodKey.webhook_url || '';
+            }
+
+            // Merchant settings
+            if (data.merchant) {
+                document.getElementById('merchant-store-name').value = data.merchant.store_name || '';
+                document.getElementById('merchant-id-input').value = data.merchant.merchant_id || '';
+                document.getElementById('merchant-qris-static').value = data.merchant.qris_static || '';
+                const modeEl = document.getElementById('merchant-mode-select');
+                if (modeEl) modeEl.value = 'dedicated';
+            }
+
+            // Transactions Table
+            const tbody = document.getElementById('tx-tbody');
+            tbody.innerHTML = '';
+            if (!data.recentTransactions || data.recentTransactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400 font-sans">Belum ada transaksi. Silakan coba simulator pembayaran di halaman demo!</td></tr>';
+            } else {
+                data.recentTransactions.forEach(tx => {
+                    const statusClass = tx.transaction_status === 'settlement' 
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                        : (tx.transaction_status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200');
+                    
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="py-3 px-3 font-bold text-slate-900">${tx.order_id}</td>
+                            <td class="py-3 px-3 font-sans text-slate-600">${tx.customer_name || '-'}</td>
+                            <td class="py-3 px-3 font-bold text-emerald-600">Rp ${Number(tx.gross_amount).toLocaleString('id-ID')}</td>
+                            <td class="py-3 px-3">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">
+                                    ${tx.transaction_status}
+                                </span>
+                            </td>
+                            <td class="py-3 px-3 text-[11px] text-slate-500">${tx.created_at.replace('T', ' ').substring(0, 19)}</td>
+                            <td class="py-3 px-3 text-right">
+                                <a href="/snap/pay/${tx.snap_token}" target="_blank" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-indigo-600 border border-slate-200 text-[11px] font-semibold transition">
+                                    Buka QR
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function switchTab(tabId) {
+            ['keys', 'gobiz', 'webhook', 'transactions'].forEach(t => {
+                document.getElementById(`tab-content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).classList.remove('active', 'text-white');
+                document.getElementById(`tab-btn-${t}`).classList.add('text-slate-500');
+            });
+
+            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.classList.add('active', 'text-white');
+            activeBtn.classList.remove('text-slate-500');
+        }
+
+        async function saveMerchantSettings(e) {
+            e.preventDefault();
+            const store_name = document.getElementById('merchant-store-name').value;
+            const merchant_id = document.getElementById('merchant-id-input').value;
+            const qris_static = document.getElementById('merchant-qris-static').value;
+            const mode = 'dedicated';
+
+            try {
+                const res = await fetch('/api/merchant/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': authToken },
+                    body: JSON.stringify({ store_name, merchant_id, qris_static, mode })
+                });
+                const data = await res.json();
+                alert(data.message || 'Pengaturan berhasil disimpan!');
+                refreshDashboard();
+            } catch (err) {
+                alert('Gagal menyimpan: ' + err.message);
+            }
+        }
+
+        async function saveWebhookSettings(e) {
+            e.preventDefault();
+            const webhook_url = document.getElementById('webhook-url-input').value;
+
+            try {
+                const res = await fetch('/api/merchant/update-webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': authToken },
+                    body: JSON.stringify({ webhook_url })
+                });
+                const data = await res.json();
+                alert(data.message || 'Webhook URL berhasil disimpan!');
+                refreshDashboard();
+            } catch (err) {
+                alert('Gagal menyimpan: ' + err.message);
+            }
+        }
+
+        async function testWebhookPing() {
+            const btn = document.getElementById('btn-test-webhook');
+            const msg = document.getElementById('test-webhook-msg');
+            btn.disabled = true;
+            msg.innerText = 'Mengirim request uji coba ke webhook target...';
+
+            try {
+                const res = await fetch('/api/merchant/test-webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-auth-token': authToken }
+                });
+                const data = await res.json();
+                msg.innerText = data.message;
+            } catch (err) {
+                msg.innerText = 'Error: ' + err.message;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function copyField(elementId) {
+            const input = document.getElementById(elementId);
+            navigator.clipboard.writeText(input.value);
+            alert('Kunci berhasil disalin ke clipboard!');
+        }
+
+        function toggleVisibility(elementId) {
+            const input = document.getElementById(elementId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        init();
+    </script>
+</body>
+</html>

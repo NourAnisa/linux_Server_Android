@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenQRIS — Live Checkout Simulator (Midtrans Snap Demo)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- OpenQRIS Snap.js Embed -->
+    <script src="/snap/snap.js" data-client-key="OQ-client-sandbox-demo123"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .glass-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    </style>
+    <link rel="icon" type="image/png" href="/icon.png?v=4">
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-6 bg-slate-50">
+
+    <!-- Topbar -->
+    <div class="max-w-4xl w-full mx-auto flex items-center justify-between pb-6 border-b border-slate-200">
+        <a href="/" class="flex items-center space-x-3 text-slate-900 hover:opacity-90 transition">
+            <img src="/logo.png?v=4" alt="OpenQRIS.id" class="h-7 object-contain">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 border-l border-slate-300 pl-3">Simulator Demo</span>
+        </a>
+        <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs font-semibold text-slate-600">Sandbox Environment</span>
+        </div>
+    </div>
+
+    <!-- Main Store Demo Card -->
+    <div class="max-w-xl w-full mx-auto my-8 glass-box rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-slate-200 bg-white">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-2xl mx-auto mb-3 shadow-sm">
+                <i class="fa-solid fa-mug-hot"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900">Bit & Bean Coffee Store</h1>
+            <p class="text-xs text-slate-500 mt-1">Simulasi Pembayaran Checkout Web Store Menggunakan <b>Snap.js</b></p>
+        </div>
+
+        <!-- Product Details -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-xl text-amber-600 shadow-sm">
+                        ☕
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Aren Latte Premium 1L</h4>
+                        <p class="text-[11px] text-slate-500">Freshly Brewed House Blend Bit & Bean</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400">Total Tagihan</span>
+                    <p class="text-base font-extrabold text-indigo-600" id="display-amount">Rp 45.000</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Inputs -->
+        <form onsubmit="handleCheckout(event)" class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Pemesan</label>
+                <input type="text" id="cust-name" value="Bu Anisa" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Email</label>
+                    <input type="email" id="cust-email" value="anisa@openqris.id" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor WhatsApp</label>
+                    <input type="tel" id="cust-phone" value="085155133070" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nominal Uji Coba</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="setNominal(1000)" class="py-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">Rp 1.000</button>
+                    <button type="button" onclick="setNominal(15000)" class="py-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">Rp 15.000</button>
+                    <button type="button" onclick="setNominal(45000)" class="py-2 rounded-xl text-xs font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 transition">Rp 45.000</button>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" id="btn-pay" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/25 transition flex items-center justify-center space-x-2 active:scale-[0.98]">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>Buka Pop-up Snap QRIS Dinamis</span>
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+            <span class="text-[11px] text-slate-400">Dipersembahkan oleh <a href="/" class="text-indigo-600 hover:underline font-semibold">OpenQRIS.id</a> — 0% Komisi MDR</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="max-w-4xl w-full mx-auto text-center text-xs text-slate-400 pt-4">
+        <a href="/docs" class="text-indigo-600 hover:underline mx-2">Dokumentasi API</a> •
+        <a href="/dashboard" class="text-indigo-600 hover:underline mx-2">Kelola Kunci Merchant</a> •
+        <a href="/" class="text-indigo-600 hover:underline mx-2">Kembali ke Beranda</a>
+    </div>
+
+    <script>
+        let currentAmount = 45000;
+
+        function setNominal(amount) {
+            currentAmount = amount;
+            document.getElementById('display-amount').innerText = 'Rp ' + amount.toLocaleString('id-ID');
+        }
+
+        async function handleCheckout(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-pay');
+            btn.disabled = true;
+            btn.innerText = 'Menyiapkan Snap Token...';
+
+            const payload = {
+                transaction_details: {
+                    order_id: 'ORDER-DEMO-' + Date.now(),
+                    gross_amount: currentAmount
+                },
+                customer_details: {
+                    first_name: document.getElementById('cust-name').value,
+                    email: document.getElementById('cust-email').value,
+                    phone: document.getElementById('cust-phone').value
+                }
+            };
+
+            try {
+                const res = await fetch('/api/v2/charge', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('OQ-server-sandbox-demo123:')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!data.token) {
+                    alert('Gagal membuat transaksi: ' + (data.status_message || JSON.stringify(data)));
+                    return;
+                }
+
+                // Trigger Snap Pop-up!
+                window.snap.pay(data.token, {
+                    onSuccess: function(result) {
+                        alert('✅ Pembayaran Sukses Dikonfirmasi!');
+                        console.log('Success:', result);
+                    },
+                    onPending: function(result) {
+                        console.log('Pending:', result);
+                    },
+                    onError: function(result) {
+                        alert('❌ Pembayaran Gagal');
+                        console.log('Error:', result);
+                    },
+                    onClose: function() {
+                        console.log('Snap modal ditutup oleh pengguna.');
+                    }
+                });
+
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-qrcode mr-2"></i> Buka Pop-up Snap QRIS Dinamis';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenQRIS — Payment Gateway QRIS Dinamis 0% MDR (Model BYOM)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .gradient-text { background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); }
+        .glow-card:hover { border-color: #6366f1; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.12); }
+    </style>
+    <link rel="icon" type="image/png" href="/icon.png?v=4">
+</head>
+<body class="selection:bg-indigo-500 selection:text-white bg-slate-50">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center"><img src="/logo.png?v=4" alt="OpenQRIS.id" class="h-10 sm:h-12 object-contain hover:opacity-90 transition"></a>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600">
+                <a href="#fitur" class="hover:text-indigo-600 transition">Keunggulan</a>
+                <a href="#cara-kerja" class="hover:text-indigo-600 transition">Cara Kerja</a>
+                <a href="#pricing" class="hover:text-indigo-600 transition">Biaya Langganan</a>
+                <a href="/docs" class="hover:text-indigo-600 transition">Dokumentasi API</a>
+                <a href="/demo" class="hover:text-indigo-600 transition text-sky-600 font-bold"><i class="fa-solid fa-bolt mr-1"></i> Live Demo</a>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition active:scale-95 flex items-center space-x-2">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Masuk Dashboard</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-36 pb-20 relative overflow-hidden">
+        <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 mb-6 text-xs text-slate-700 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-semibold">Penyedia API Payment Gateway Model BYOM</span>
+                <span class="text-slate-400">•</span>
+                <span class="text-indigo-600 font-bold">0% Potongan MDR</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.15] max-w-4xl mx-auto">
+                Payment Gateway QRIS Dinamis <span class="gradient-text">Tanpa Penahanan Saldo.</span>
+            </h1>
+
+            <p class="mt-6 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                Terima pembayaran dari seluruh Bank & E-Wallet langsung ke akun GoBiz Anda detik itu juga. Kompatibel 100% dengan Midtrans API & Snap Popup Widget.
+            </p>
+
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="/dashboard#register" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 shadow-xl shadow-indigo-600/25 transition active:scale-95 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-rocket"></i>
+                    <span>Daftar Sekarang (Gratis)</span>
+                </a>
+                <a href="/demo" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white text-slate-700 border border-slate-200 font-bold text-sm hover:bg-slate-50 transition active:scale-95 flex items-center justify-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-play text-indigo-600"></i>
+                    <span>Coba Simulator Checkout</span>
+                </a>
+            </div>
+
+            <!-- Stats Pill -->
+            <div class="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                    <div class="text-2xl font-black text-slate-900">0%</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Biaya MDR / Komisi</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                    <div class="text-2xl font-black text-emerald-600">Real-Time</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Settlement ke Rekening</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                    <div class="text-2xl font-black text-indigo-600">Midtrans</div>
+                    <div class="text-xs text-slate-500 mt-0.5">100% Drop-in API</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                    <div class="text-2xl font-black text-slate-900">30+</div>
+                    <div class="text-xs text-slate-500 mt-0.5">Bank & E-Wallet QRIS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Keunggulan Section -->
+    <section id="fitur" class="py-20 relative border-t border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-600">Kenapa Memilih OpenQRIS</h2>
+                <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2">Bebas Biaya MDR 0.7%, Dana Langsung Masuk ke Rekening</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glow-card p-8 rounded-3xl">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-xl mb-6 shadow-sm">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Tanpa Penahanan Saldo</h3>
+                    <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                        Tidak ada sistem saldo mengendap di pihak ketiga. Uang pembeli dari QRIS dinamis langsung masuk ke akun GoBiz Anda tanpa proses withdraw manual.
+                    </p>
+                </div>
+
+                <div class="glow-card p-8 rounded-3xl">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 text-xl mb-6 shadow-sm">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Kompatibel API Midtrans</h3>
+                    <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                        Cukup ubah Base URL dan Server Key di plugin WooCommerce, SDK Node.js, PHP, Python, atau Laravel Anda. Tanpa perlu rewrite kode!
+                    </p>
+                </div>
+
+                <div class="glow-card p-8 rounded-3xl">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 text-xl mb-6 shadow-sm">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Webhook Real-Time</h3>
+                    <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                        Sistem verifikasi otomatis memeriksa status pembayaran setiap beberapa detik dan menembakkan notifikasi webhook HTTP POST instan ke server Anda.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cara Kerja Section -->
+    <section id="cara-kerja" class="py-20 border-t border-slate-200 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-600">Arsitektur Cerdas</h2>
+                <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2">Bagaimana OpenQRIS Bekerja?</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                <div class="glow-card p-6 rounded-2xl">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center mx-auto mb-4 text-sm shadow">1</div>
+                    <h4 class="font-bold text-slate-900 text-sm">Integrasi Kunci API</h4>
+                    <p class="text-xs text-slate-500 mt-2">Daftar akun dan dapatkan Client Key & Server Key di Dashboard OpenQRIS.</p>
+                </div>
+
+                <div class="glow-card p-6 rounded-2xl">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center mx-auto mb-4 text-sm shadow">2</div>
+                    <h4 class="font-bold text-slate-900 text-sm">Generate QR Dinamis</h4>
+                    <p class="text-xs text-slate-500 mt-2">Engine EMVCo mengonversi QRIS toko Anda menjadi QR Dinamis berisikan nominal spesifik transaksi.</p>
+                </div>
+
+                <div class="glow-card p-6 rounded-2xl">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center mx-auto mb-4 text-sm shadow">3</div>
+                    <h4 class="font-bold text-slate-900 text-sm">Pembeli Membayar</h4>
+                    <p class="text-xs text-slate-500 mt-2">Pembeli scan dengan BCA, Mandiri, BRI, GoPay, OVO, Dana, ShopeePay, dsb.</p>
+                </div>
+
+                <div class="glow-card p-6 rounded-2xl">
+                    <div class="w-10 h-10 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center mx-auto mb-4 text-sm shadow">4</div>
+                    <h4 class="font-bold text-slate-900 text-sm">Dana Cair & Webhook</h4>
+                    <p class="text-xs text-slate-500 mt-2">Uang masuk ke GoBiz Anda 100% utuh dan webhook notifikasi otomatis terkirim.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 border-t border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-600">Biaya Langganan</h2>
+                <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-2">Investasi Ringan, Hemat Jutaan Rupiah Biaya Transaksi</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Free Tier -->
+                <div class="glow-card p-8 rounded-3xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Starter Merchant</span>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1">Free Tier</h3>
+                        <div class="mt-4 flex items-baseline">
+                            <span class="text-4xl font-extrabold text-slate-900">Rp 0</span>
+                            <span class="text-xs text-slate-500 ml-2">/ selamanya</span>
+                        </div>
+                        <ul class="mt-8 space-y-3 text-xs text-slate-600">
+                            <li class="flex items-center"><i class="fa-solid fa-check text-indigo-600 mr-2.5"></i> 0% Potongan Komisi MDR</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-indigo-600 mr-2.5"></i> Hingga 100 Transaksi / Bulan</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-indigo-600 mr-2.5"></i> Snap.js Popup Widget</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-indigo-600 mr-2.5"></i> Webhook Notifikasi Real-Time</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-indigo-600 mr-2.5"></i> Notifikasi Telegram Otomatis</li>
+                        </ul>
+                    </div>
+                    <a href="/dashboard#register" class="mt-8 w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white font-bold text-xs text-center shadow-lg shadow-indigo-500/20 transition">Pilih Paket Starter</a>
+                </div>
+
+                <!-- Pro Tier -->
+                <div class="glow-card p-8 rounded-3xl flex flex-col justify-between border-2 border-indigo-500/30">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Developer & Agency</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-[10px] border border-indigo-200">POPULER</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1">Pro Developer</h3>
+                        <div class="mt-4 flex items-baseline">
+                            <span class="text-4xl font-extrabold text-slate-900">Rp 59.000</span>
+                            <span class="text-xs text-slate-500 ml-2">/ bulan</span>
+                        </div>
+                        <ul class="mt-8 space-y-3 text-xs text-slate-600">
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-600 mr-2.5"></i> Seluruh Fitur Starter</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-600 mr-2.5"></i> Multi-Merchant Akun</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-600 mr-2.5"></i> Prioritas Auto-Polling (2 Detik)</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-600 mr-2.5"></i> Custom Branding Snap Modal</li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-emerald-600 mr-2.5"></i> Dukungan Integrasi Langsung</li>
+                        </ul>
+                    </div>
+                    <a href="/dashboard#register" class="mt-8 w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs text-center transition shadow">Pilih Paket Pro</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white py-12 text-slate-500 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center"><img src="/logo.png?v=4" alt="OpenQRIS.id" class="h-9 object-contain"></a>
+                <span class="text-[11px] text-slate-400 border-l border-slate-200 pl-3">API Payment Gateway QRIS Dinamis 0% MDR.</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="/docs" class="hover:text-indigo-600 transition">Dokumentasi</a>
+                <a href="/demo" class="hover:text-indigo-600 transition">Simulator</a>
+                <a href="/dashboard" class="hover:text-indigo-600 transition">Dashboard</a>
+                <a href="https://t.me/noranisa_bot" target="_blank" class="hover:text-sky-600 transition text-sky-600 font-semibold"><i class="fa-brands fa-telegram mr-1"></i> CS Nadia</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
