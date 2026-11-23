@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TinyCore Linux - Redmi Note 9 Server</title>
+    <!-- Retro modern fonts, FontAwesome, Marked.js, Highlight.js -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <style>
+        :root {
+            --tc-bg: #49637b;
+            --tc-topbar: #2b3a4a;
+            --tc-win-border: #637b94;
+            --tc-win-title: #3b5066;
+            --tc-win-title-active: #2f4254;
+            --tc-dock-bg: rgba(30, 41, 59, 0.75);
+            --tc-accent: #38bdf8;
+            --agy-purple: #a855f7;
+            --agy-cyan: #06b6d4;
+            --agy-dark: #090d16;
+            --agy-card: #131b2e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background: var(--tc-bg);
+            background: radial-gradient(circle at center, #56728c 0%, #3d5367 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #f1f5f9;
+            position: relative;
+        }
+
+        /* TinyCore Logo Watermark */
+        .desktop-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .desktop-watermark i {
+            font-size: 160px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+        .desktop-watermark h1 {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .desktop-watermark p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        /* Top Panel (TinyCore FLWM Bar) */
+        .topbar {
+            height: 32px;
+            background: var(--tc-topbar);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            font-size: 12px;
+            position: relative;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow-x: auto;
+        }
+
+        .topbar-brand {
+            font-weight: 700;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .topbar-brand span {
+            color: var(--tc-accent);
+        }
+
+        .topbar-menu-item {
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .topbar-menu-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .topbar-menu-item.highlight-agy {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            color: #f3e8ff;
+            font-weight: 600;
+        }
+        .topbar-menu-item.highlight-agy:hover {
+            background: rgba(168, 85, 247, 0.35);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .sys-badge {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Windows Generic (FLWM TinyCore Style) */
+        .window {
+            position: absolute;
+            background: #1e293b;
+            border: 2px solid var(--tc-win-border);
+            border-radius: 8px 8px 6px 6px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            min-width: 320px;
+            min-height: 220px;
+        }
+
+        .window.active {
+            border-color: #93c5fd;
+            z-index: 200;
+        }
+
+        .window-titlebar {
+            height: 30px;
+            background: var(--tc-win-title);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            cursor: move;
+            font-size: 12px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .window.active .window-titlebar {
+            background: var(--tc-win-title-active);
+            color: #ffffff;
+        }
+
+        .titlebar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .titlebar-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-win {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 8px;
+            font-weight: bold;
+            color: #1e293b;
+            transition: opacity 0.15s;
+        }
+        .btn-win:hover {
+            opacity: 0.85;
+        }
+        .btn-min { background: #fbbf24; }
+        .btn-max { background: #34d399; }
+        .btn-close { background: #f87171; }
+
+        .window-body {
+            flex: 1;
+            position: relative;
+            background: #000000;
+            overflow: hidden;
+        }
+
+        /* Iframe for Terminal */
+        .terminal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000000;
+        }
+
+        /* Bottom Dock (Iconic TinyCore wbar) */
+        .dock-container {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--tc-dock-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+        }
+
+        .dock-item {
+            position: relative;
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #e2e8f0;
+            font-size: 20px;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .dock-item:hover {
+            transform: translateY(-8px) scale(1.22);
+            background: rgba(56, 189, 248, 0.25);
+            border-color: #38bdf8;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.35);
+        }
+
+        .dock-tooltip {
+            position: absolute;
+            top: -34px;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(6px);
+            transition: all 0.15s ease;
+        }
+
+        .dock-item:hover .dock-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Generic modal body content */
+        .content-panel {
+            padding: 16px;
+            background: #0f172a;
+            color: #cbd5e1;
+            height: 100%;
+            overflow-y: auto;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .file-list-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
+        .badge-green { color: #4ade80; }
+        .badge-blue { color: #38bdf8; }
+        .badge-amber { color: #f59e0b; }
+
+        /* ========================================================
+           ANTIGRAVITY AI AGENT WINDOW STYLES
+           ======================================================== */
+        #win-antigravity {
+            border: 2px solid #a855f7;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(168, 85, 247, 0.35);
+        }
+        #win-antigravity.active {
+            border-color: #c084fc;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(192, 132, 252, 0.45);
+        }
+
+        .agy-header-bar {
+            height: 42px;
+            background: #0e1526;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            font-size: 12px;
+        }
+
+        .agy-selector-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .agy-select {
+            background: #182238;
+            color: #f1f5f9;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+        }
+        .agy-select:focus {
+            border-color: #c084fc;
+        }
+
+        .agy-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.12);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .agy-chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 42px);
+            background: var(--agy-dark);
+        }
+
+        .agy-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            user-select: text;
+        }
+
+        /* Welcome hero card */
+        .agy-hero-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(6, 182, 212, 0.08));
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .agy-hero-card i.atom-hero {
+            font-size: 42px;
+            color: #c084fc;
+            filter: drop-shadow(0 0 16px rgba(192, 132, 252, 0.6));
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: spinAgy 20s linear infinite;
+        }
+        @keyframes spinAgy {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .agy-hero-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+        .agy-hero-card p {
+            font-size: 13px;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto 16px auto;
+            line-height: 1.5;
+        }
+
+        .agy-quick-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .agy-chip {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .agy-chip:hover {
+            background: rgba(168, 85, 247, 0.25);
+            border-color: #a855f7;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* Message Bubbles */
+        .agy-msg-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+        .agy-msg-row.user {
+            justify-content: flex-end;
+        }
+
+        .agy-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .agy-avatar.assistant {
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+        }
+        .agy-avatar.user {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .agy-msg-body {
+            max-width: 82%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .agy-msg-row.user .agy-msg-body {
+            align-items: flex-end;
+        }
+
+        .agy-msg-text {
+            background: #151d30;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            word-break: break-word;
+        }
+        .agy-msg-row.user .agy-msg-text {
+            background: #27354f;
+            border-color: rgba(56, 189, 248, 0.3);
+            color: #ffffff;
+            border-radius: 10px 2px 10px 10px;
+        }
+
+        /* Tool Call Accordion Steps */
+        .agy-step-card {
+            background: #0f172a;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        .agy-step-header {
+            padding: 7px 12px;
+            background: rgba(168, 85, 247, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .agy-step-header:hover {
+            background: rgba(168, 85, 247, 0.18);
+        }
+        .agy-step-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e2e8f0;
+        }
+        .agy-step-badge {
+            background: #7c3aed;
+            color: #ffffff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .agy-step-content {
+            padding: 10px 12px;
+            background: #080d1a;
+            color: #94a3b8;
+            max-height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border-top: 1px solid rgba(0, 0, 0, 0.3);
+        }
+
+        /* Markdown Elements Inside Assistant Replies */
+        .agy-msg-text h1, .agy-msg-text h2, .agy-msg-text h3 {
+            color: #f8fafc;
+            margin-top: 10px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .agy-msg-text h1 { font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+        .agy-msg-text h2 { font-size: 14px; }
+        .agy-msg-text h3 { font-size: 13px; }
+        .agy-msg-text p { margin-bottom: 8px; }
+        .agy-msg-text p:last-child { margin-bottom: 0; }
+        .agy-msg-text ul, .agy-msg-text ol { margin-left: 20px; margin-bottom: 8px; }
+        .agy-msg-text li { margin-bottom: 3px; }
+        .agy-msg-text code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #38bdf8;
+        }
+        .agy-msg-text pre {
+            background: #090e17;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+        .agy-msg-text pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: #f1f5f9;
+        }
+        .agy-msg-text table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        .agy-msg-text th, .agy-msg-text td {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 6px 10px;
+            text-align: left;
+        }
+        .agy-msg-text th {
+            background: rgba(255, 255, 255, 0.06);
+            color: #38bdf8;
+        }
+
+        /* Pulse / Loading status */
+        .agy-loading-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: #c084fc;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .agy-pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #c084fc;
+            border-radius: 50%;
+            animation: pulseAgy 1.2s infinite ease-in-out;
+        }
+        @keyframes pulseAgy {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 1; filter: drop-shadow(0 0 6px #c084fc); }
+        }
+
+        /* Chat Input Box */
+        .agy-input-container {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0a0f1d;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .agy-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .agy-textarea {
+            flex: 1;
+            background: #141b2d;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-family: inherit;
+            resize: none;
+            max-height: 120px;
+            min-height: 42px;
+            outline: none;
+            line-height: 1.4;
+            user-select: text;
+        }
+        .agy-textarea:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+        }
+        .agy-btn-send {
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0 18px;
+            height: 42px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .agy-btn-send:hover {
+            background: linear-gradient(135deg, #9333ea, #a855f7);
+            box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4);
+            transform: translateY(-1px);
+        }
+        .agy-btn-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Status Bar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="topbar-brand">
+                <i class="fa-solid fa-microchip"></i>
+                <span>TinyCore</span> Linux 15.0
+            </div>
+            <!-- Antigravity AI Topbar Shortcut -->
+            <div class="topbar-menu-item highlight-agy" onclick="toggleWindow('win-antigravity')">
+                <i class="fa-solid fa-atom text-purple-400"></i> Antigravity AI
+            </div>
+            <div class="topbar-menu-item" onclick="toggleWindow('win-term')"><i class="fa-solid fa-terminal mr-1"></i> aterm</div>
+            <div class="topbar-menu-item" onclick="toggleWindow('win-files')"><i class="fa-solid fa-folder-tree mr-1"></i> Files</div>
+            <div class="topbar-menu-item" onclick="toggleWindow('win-sys')"><i class="fa-solid fa-gauge-high mr-1"></i> Monitor</div>
+            <div class="topbar-menu-item" onclick="toggleWindow('win-gopay')"><i class="fa-solid fa-qrcode mr-1"></i> GoPay QRIS</div>
+            <div class="topbar-menu-item" onclick="window.open('https://openqris.jokicoding.web.id', '_blank')"><i class="fa-solid fa-bolt mr-1"></i> OpenQRIS</div>
+            <div class="topbar-menu-item" onclick="window.open('https://openjob.jokicoding.web.id', '_blank')"><i class="fa-solid fa-briefcase mr-1"></i> OpenJob</div>
+            <div class="topbar-menu-item" onclick="window.open('https://openjurnal.jokicoding.web.id', '_blank')"><i class="fa-solid fa-graduation-cap mr-1"></i> OpenJurnal</div>
+            <div class="topbar-menu-item" onclick="window.open('https://openplag.jokicoding.web.id', '_blank')"><i class="fa-solid fa-book-open mr-1"></i> OpenPlag</div>
+        </div>
+        <div class="topbar-right">
+            <div class="sys-badge"><i class="fa-solid fa-mobile-screen"></i> Redmi Note 9 (merlin)</div>
+            <div class="sys-badge"><i class="fa-solid fa-memory"></i> RAM: <span id="topbar-ram">Loading...</span></div>
+            <div class="sys-badge" id="topbar-clock">00:00:00</div>
+        </div>
+    </div>
+
+    <!-- Desktop Background Watermark -->
+    <div class="desktop-watermark">
+        <i class="fa-brands fa-linux"></i>
+        <h1>TinyCore Linux</h1>
+        <p>Micro Core ARM64 Server Edition • Port 7681</p>
+    </div>
+
+    <!-- ========================================================
+         WINDOW 0: ANTIGRAVITY AI AGENT (AUTONOMOUS CODE & SYSTEM)
+         ======================================================== -->
+    <div id="win-antigravity" class="window" style="top: 42px; left: 140px; width: 920px; height: 620px; display: none;">
+        <div class="window-titlebar" onmousedown="startDrag(event, 'win-antigravity')">
+            <div class="titlebar-title">
+                <i class="fa-solid fa-atom text-purple-400"></i>
+                <span>Antigravity AI Agent • Autonomous Code &amp; System Manager</span>
+            </div>
+            <div class="titlebar-controls">
+                <div class="btn-win btn-min" onclick="minimizeWindow('win-antigravity')">_</div>
+                <div class="btn-win btn-max" onclick="maximizeWindow('win-antigravity')">▢</div>
+                <div class="btn-win btn-close" onclick="closeWindow('win-antigravity')">✕</div>
+            </div>
+        </div>
+        <div class="window-body" style="background: var(--agy-dark);">
+            <!-- Agent Header Toolbar -->
+            <div class="agy-header-bar">
+                <div class="agy-selector-group">
+                    <span style="color:#94a3b8;"><i class="fa-solid fa-brain text-purple-400"></i> Model:</span>
+                    <select id="agent-model" class="agy-select">
+                        <option value="deepseek-v4.1-flash-free" selected>DeepSeek V4.1 Flash (Reasoning + Code)</option>
+                        <option value="ovh/Mistral-Small-3.2-24B-Instruct-2506">Mistral Small 3.2 24B (OVH Cloud)</option>
+                        <option value="ovh/Meta-Llama-3_3-70B-Instruct">Meta Llama 3.3 70B (OVH Cloud)</option>
+                        <option value="nemotron-3.5-lightning-free">NVIDIA Nemotron 3.5 Lightning</option>
+                        <option value="qwen4-max-free">Qwen4 Max Free</option>
+                        <option value="codestral-latest">Codestral Latest (Mistral)</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="agy-badge"><i class="fa-solid fa-circle text-emerald-400 text-xs"></i> Bansos Gateway Active</span>
+                    <span style="font-family:'Share Tech Mono', monospace; font-size:11px; color:#a5f3fc;"><i class="fa-solid fa-key"></i> bansos</span>
+                    <button onclick="clearAgentChat()" style="background:#1e293b; color:#cbd5e1; border:1px solid #475569; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i> Reset</button>
+                </div>
+            </div>
+
+            <!-- Agent Chat Box -->
+            <div class="agy-chat-container">
+                <div class="agy-messages" id="agent-messages-box">
+                    <!-- Hero Welcome -->
+                    <div class="agy-hero-card" id="agent-hero-card">
+                        <i class="fa-solid fa-atom atom-hero"></i>
+                        <h3>Antigravity AI Autonomous Coding Assistant</h3>
+                        <p>Halo Bu Anisa! Saya terhubung langsung ke sistem server Redmi Note 9 dan seluruh repositori di <code>/var/www</code> (OpenQRIS, GoPay Gateway, OpenJob, OpenJurnal, OpenPlag, TinyCore Desktop). Silakan perintahkan saya untuk memeriksa bug, memperbaiki kode, atau mengelola service.</p>
+                        
+                        <div class="agy-quick-chips">
+                            <div class="agy-chip" onclick="quickSend('Audit status semua service yang berjalan di /var/www dan cek apakah ada proses yang mati')">
+                                <i class="fa-solid fa-stethoscope text-emerald-400"></i> Audit Semua Service
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Periksa status OpenQRIS di /var/www/openqris, cek database sqlite, dan lihat 5 mutasi/order terbaru')">
+                                <i class="fa-solid fa-bolt text-yellow-400"></i> Cek Mutasi OpenQRIS
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Tolong periksa error log terbaru di /var/log dan log semua program di /var/www')">
+                                <i class="fa-solid fa-bug text-red-400"></i> Cek Error Log Terbaru
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Cek penggunaan resource CPU, RAM, dan disk space di server Redmi Note 9 saat ini')">
+                                <i class="fa-solid fa-gauge-high text-cyan-400"></i> Metrik Resource RAM &amp; CPU
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Periksa file konfigurasi dan package.json di /var/www/openqris lalu laporkan arsitekturnya')">
+                                <i class="fa-solid fa-file-code text-purple-400"></i> Inspeksi Kode OpenQRIS
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Restart service openqris secara aman lalu pastikan port 5060 aktif kembali')">
+                                <i class="fa-solid fa-rotate text-blue-400"></i> Restart Service OpenQRIS
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Field -->
+                <div class="agy-input-container">
+                    <div class="agy-input-row">
+                        <textarea id="agent-input" class="agy-textarea" placeholder="Tulis instruksi perbaikan atau keluhan sistem (misal: 'Cek kenapa openqris gagal kirim webhook dan perbaiki kode dispatcher-nya')..." rows="1" onkeydown="handleAgentInputKeyDown(event)"></textarea>
+                        <button id="agent-btn-send" class="agy-btn-send" onclick="sendAgentMessage()">
+                            <i class="fa-solid fa-paper-plane"></i> Kirim
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOW 1: ATERM TERMINAL (MAIN) -->
+    <div id="win-term" class="window active" style="top: 52px; left: 80px; width: 880px; height: 520px;">
+        <div class="window-titlebar" onmousedown="startDrag(event, 'win-term')">
+            <div class="titlebar-title">
+                <i class="fa-solid fa-terminal text-sky-400"></i>
+                <span>aterm: root@localhost:/var/www</span>
+            </div>
+            <div class="titlebar-controls">
+                <div class="btn-win btn-min" onclick="minimizeWindow('win-term')">_</div>
+                <div class="btn-win btn-max" onclick="maximizeWindow('win-term')">▢</div>
+                <div class="btn-win btn-close" onclick="closeWindow('win-term')">✕</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <iframe id="terminal-iframe" src="/term-embed" class="terminal-iframe"></iframe>
+        </div>
+    </div>
+
+    <!-- WINDOW 2: FILE EXPLORER (/var/www) -->
+    <div id="win-files" class="window" style="top: 90px; left: 160px; width: 620px; height: 420px; display: none;">
+        <div class="window-titlebar" onmousedown="startDrag(event, 'win-files')">
+            <div class="titlebar-title">
+                <i class="fa-solid fa-folder text-amber-400"></i>
+                <span id="files-current-dir">File Manager: /var/www</span>
+            </div>
+            <div class="titlebar-controls">
+                <div class="btn-win btn-min" onclick="minimizeWindow('win-files')">_</div>
+                <div class="btn-win btn-max" onclick="maximizeWindow('win-files')">▢</div>
+                <div class="btn-win btn-close" onclick="closeWindow('win-files')">✕</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="content-panel" id="files-list-container">
+                <p>Memuat daftar direktori /var/www...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOW 3: SYSTEM MONITOR -->
+    <div id="win-sys" class="window" style="top: 120px; left: 240px; width: 680px; height: 440px; display: none;">
+        <div class="window-titlebar" onmousedown="startDrag(event, 'win-sys')">
+            <div class="titlebar-title">
+                <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                <span>System Monitor: Redmi Note 9 Performance</span>
+            </div>
+            <div class="titlebar-controls">
+                <div class="btn-win btn-min" onclick="minimizeWindow('win-sys')">_</div>
+                <div class="btn-win btn-max" onclick="maximizeWindow('win-sys')">▢</div>
+                <div class="btn-win btn-close" onclick="closeWindow('win-sys')">✕</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="content-panel">
+                <div style="margin-bottom: 12px; display: flex; justify-content: space-between;">
+                    <span class="badge-blue"><i class="fa-solid fa-bolt"></i> Live Diagnostics</span>
+                    <button onclick="loadSysInfo()" style="background:#1e293b; color:#fff; border:1px solid #475569; padding:2px 8px; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+                <pre id="sysinfo-pre" style="white-space: pre-wrap; color: #a5f3fc; line-height: 1.5;">Mengambil metrik server...</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOW 4: GOPAY QRIS GATEWAY STATUS -->
+    <div id="win-gopay" class="window" style="top: 140px; left: 320px; width: 560px; height: 380px; display: none;">
+        <div class="window-titlebar" onmousedown="startDrag(event, 'win-gopay')">
+            <div class="titlebar-title">
+                <i class="fa-solid fa-qrcode text-cyan-400"></i>
+                <span>GoPay Gateway: Bit & Bean QRIS Status</span>
+            </div>
+            <div class="titlebar-controls">
+                <div class="btn-win btn-min" onclick="minimizeWindow('win-gopay')">_</div>
+                <div class="btn-win btn-max" onclick="maximizeWindow('win-gopay')">▢</div>
+                <div class="btn-win btn-close" onclick="closeWindow('win-gopay')">✕</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="content-panel" style="font-size: 13px;">
+                <h4 style="color:#38bdf8; margin-bottom: 10px;"><i class="fa-solid fa-circle-check text-green-400"></i> Gateway Port 3005 Active</h4>
+                <p><b>Merchant ID:</b> G561368839</p>
+                <p><b>Nama Outlet:</b> NOR ANISA, Transportasi (BIT &amp; BEAN)</p>
+                <p><b>Status Sesi:</b> <span class="badge-green">Aktif &amp; Terverifikasi SMS OTP</span></p>
+                <p><b>Layanan Terhubung:</b> OpenPlag.id, OpenJurnal.id, &amp; OpenJob.id</p>
+                <p><b>Mode QRIS:</b> Dynamic Generator (EMVCo Tag 54 Pas)</p>
+                <hr style="border:0; border-top:1px solid #334155; margin:12px 0;">
+                <p style="color:#94a3b8; font-size:12px;">OpenPlag, OpenJurnal, &amp; OpenJob terhubung otomatis via <code>http://127.0.0.1:3005</code> di server lokal Redmi Note 9.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Iconic Bottom Dock (wbar TinyCore) -->
+    <div class="dock-container">
+        <!-- Antigravity AI Dock Item -->
+        <div class="dock-item" onclick="toggleWindow('win-antigravity')" style="border-color: #a855f7; box-shadow: 0 0 14px rgba(168, 85, 247, 0.45); background: rgba(168, 85, 247, 0.2);">
+            <i class="fa-solid fa-atom" style="color: #c084fc;"></i>
+            <div class="dock-tooltip">Antigravity AI Agent (Code &amp; System Manager)</div>
+        </div>
+        <div class="dock-item" onclick="toggleWindow('win-term')">
+            <i class="fa-solid fa-terminal" style="color: #38bdf8;"></i>
+            <div class="dock-tooltip">Terminal (aterm)</div>
+        </div>
+        <div class="dock-item" onclick="toggleWindow('win-files'); loadFiles('/var/www');">
+            <i class="fa-solid fa-folder-tree" style="color: #fbbf24;"></i>
+            <div class="dock-tooltip">File Manager</div>
+        </div>
+        <div class="dock-item" onclick="toggleWindow('win-sys'); loadSysInfo();">
+            <i class="fa-solid fa-chart-pie" style="color: #34d399;"></i>
+            <div class="dock-tooltip">System Monitor</div>
+        </div>
+        <div class="dock-item" onclick="toggleWindow('win-gopay')">
+            <i class="fa-solid fa-qrcode" style="color: #60a5fa;"></i>
+            <div class="dock-tooltip">GoPay QRIS Bit &amp; Bean</div>
+        </div>
+        <div class="dock-item" onclick="window.open('https://openqris.jokicoding.web.id', '_blank')">
+            <i class="fa-solid fa-bolt" style="color: #818cf8;"></i>
+            <div class="dock-tooltip">OpenQRIS Gateway (0% MDR)</div>
+        </div>
+        <div class="dock-item" onclick="window.open('https://openjob.jokicoding.web.id', '_blank')">
+            <i class="fa-solid fa-briefcase" style="color: #fb923c;"></i>
+            <div class="dock-tooltip">OpenJob.id Karir &amp; Magang</div>
+        </div>
+        <div class="dock-item" onclick="window.open('https://openjurnal.jokicoding.web.id', '_blank')">
+            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8;"></i>
+            <div class="dock-tooltip">OpenJurnal.id Portal Riset</div>
+        </div>
+        <div class="dock-item" onclick="window.open('https://openplag.jokicoding.web.id', '_blank')">
+            <i class="fa-solid fa-book-open" style="color: #a78bfa;"></i>
+            <div class="dock-tooltip">OpenPlag.id Web</div>
+        </div>
+        <div class="dock-item" onclick="window.open('https://bansos.jokicoding.web.id', '_blank')">
+            <i class="fa-solid fa-robot" style="color: #f472b6;"></i>
+            <div class="dock-tooltip">Bansos AI Gateway</div>
+        </div>
+    </div>
+
+    <script>
+        // Realtime Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('topbar-clock').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Drag & Window Management
+        let draggedWin = null;
+        let offsetX = 0, offsetY = 0;
+        let highestZ = 300;
+
+        function bringToFront(winId) {
+            highestZ += 1;
+            const el = document.getElementById(winId);
+            if (el) {
+                el.style.zIndex = highestZ;
+                document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+                el.classList.add('active');
+            }
+        }
+
+        document.querySelectorAll('.window').forEach(win => {
+            win.addEventListener('mousedown', () => bringToFront(win.id));
+        });
+
+        function startDrag(e, winId) {
+            bringToFront(winId);
+            draggedWin = document.getElementById(winId);
+            const rect = draggedWin.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            function onMouseMove(moveEvent) {
+                if (draggedWin) {
+                    let newX = moveEvent.clientX - offsetX;
+                    let newY = moveEvent.clientY - offsetY;
+                    if (newY < 32) newY = 32;
+                    draggedWin.style.left = newX + 'px';
+                    draggedWin.style.top = newY + 'px';
+                }
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                draggedWin = null;
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        function toggleWindow(winId) {
+            const win = document.getElementById(winId);
+            if (!win) return;
+            if (win.style.display === 'none') {
+                win.style.display = 'flex';
+                bringToFront(winId);
+            } else {
+                win.style.display = 'none';
+            }
+        }
+
+        function closeWindow(winId) {
+            const win = document.getElementById(winId);
+            if (win) win.style.display = 'none';
+        }
+
+        function minimizeWindow(winId) {
+            closeWindow(winId);
+        }
+
+        function maximizeWindow(winId) {
+            const win = document.getElementById(winId);
+            if (!win) return;
+            if (win.dataset.maximized === 'true') {
+                win.style.top = win.dataset.oldTop;
+                win.style.left = win.dataset.oldLeft;
+                win.style.width = win.dataset.oldWidth;
+                win.style.height = win.dataset.oldHeight;
+                win.dataset.maximized = 'false';
+            } else {
+                win.dataset.oldTop = win.style.top;
+                win.dataset.oldLeft = win.style.left;
+                win.dataset.oldWidth = win.style.width;
+                win.dataset.oldHeight = win.style.height;
+                win.style.top = '32px';
+                win.style.left = '0';
+                win.style.width = '100vw';
+                win.style.height = 'calc(100vh - 32px)';
+                win.dataset.maximized = 'true';
+            }
+        }
+
+        // Load System Info
+        async function loadSysInfo() {
+            const pre = document.getElementById('sysinfo-pre');
+            pre.textContent = "Mengambil data status Redmi Note 9...";
+            try {
+                const res = await fetch('/api/sysinfo');
+                const data = await res.json();
+                pre.textContent = data.raw;
+                
+                // Parse Mem Free
+                const lines = data.raw.split('\n');
+                for (let line of lines) {
+                    if (line.includes('Mem:')) {
+                        const parts = line.trim().split(/\s+/);
+                        if (parts.length >= 3) {
+                            document.getElementById('topbar-ram').textContent = `${parts[2]}MB / ${parts[1]}MB`;
+                        }
+                    }
+                }
+            } catch(e) {
+                pre.textContent = "Gagal memuat status sistem: " + e.message;
+            }
+        }
+
+        // Load Files
+        async function loadFiles(dir) {
+            const cont = document.getElementById('files-list-container');
+            cont.innerHTML = "<p>Memuat direktori...</p>";
+            document.getElementById('files-current-dir').textContent = "File Manager: " + dir;
+            try {
+                const res = await fetch('/api/files?dir=' + encodeURIComponent(dir));
+                const data = await res.json();
+                if (data.error) {
+                    cont.innerHTML = `<p style="color:#f87171;">Error: ${data.error}</p>`;
+                    return;
+                }
+                let html = '';
+                if (dir !== '/var/www') {
+                    const parent = dir.substring(0, dir.lastIndexOf('/')) || '/var/www';
+                    html += `<div class="file-list-item" onclick="loadFiles('${parent}')"><i class="fa-solid fa-arrow-up text-sky-400"></i> <b>.. (Kembali)</b></div>`;
+                }
+                for (let f of data.files) {
+                    if (f.isDir) {
+                        html += `<div class="file-list-item" onclick="loadFiles('${f.path}')"><i class="fa-solid fa-folder text-amber-400"></i> <span style="font-weight:600;">${f.name}</span>/</div>`;
+                    } else {
+                        html += `<div class="file-list-item"><i class="fa-regular fa-file-code text-slate-400"></i> <span>${f.name}</span></div>`;
+                    }
+                }
+                cont.innerHTML = html;
+            } catch(e) {
+                cont.innerHTML = `<p style="color:#f87171;">Gagal memuat berkas: ${e.message}</p>`;
+            }
+        }
+
+        // ========================================================
+        // ANTIGRAVITY AI AGENT CLIENT CODE
+        // ========================================================
+        let agentChatHistory = [];
+        let isAgentRunning = false;
+
+        function clearAgentChat() {
+            agentChatHistory = [];
+            const box = document.getElementById('agent-messages-box');
+            box.innerHTML = `
+                <div class="agy-hero-card" id="agent-hero-card">
+                    <i class="fa-solid fa-atom atom-hero"></i>
+                    <h3>Antigravity AI Autonomous Coding Assistant</h3>
+                    <p>Halo Bu Anisa! Obrolan telah direset. Silakan perintahkan saya untuk memeriksa bug, membaca kode, atau mengelola service di <code>/var/www</code>.</p>
+                    <div class="agy-quick-chips">
+                        <div class="agy-chip" onclick="quickSend('Audit status semua service yang berjalan di /var/www dan cek apakah ada proses yang mati')">
+                            <i class="fa-solid fa-stethoscope text-emerald-400"></i> Audit Semua Service
+                        </div>
+                        <div class="agy-chip" onclick="quickSend('Periksa status OpenQRIS di /var/www/openqris, cek database sqlite, dan lihat 5 mutasi/order terbaru')">
+                            <i class="fa-solid fa-bolt text-yellow-400"></i> Cek Mutasi OpenQRIS
+                        </div>
+                        <div class="agy-chip" onclick="quickSend('Tolong periksa error log terbaru di /var/log dan log semua program di /var/www')">
+                            <i class="fa-solid fa-bug text-red-400"></i> Cek Error Log Terbaru
+                        </div>
+                        <div class="agy-chip" onclick="quickSend('Cek penggunaan resource CPU, RAM, dan disk space di server Redmi Note 9 saat ini')">
+                            <i class="fa-solid fa-gauge-high text-cyan-400"></i> Metrik Resource RAM &amp; CPU
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function quickSend(promptText) {
+            const input = document.getElementById('agent-input');
+            input.value = promptText;
+            sendAgentMessage();
+        }
+
+        function handleAgentInputKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendAgentMessage();
+            }
+        }
+
+        function renderMarkdown(text) {
+            if (!text) return '';
+            try {
+                if (typeof marked !== 'undefined') {
+                    marked.setOptions({
+                        breaks: true,
+                        gfm: true,
+                        highlight: function(code, lang) {
+                            if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                                return hljs.highlight(code, { language: lang }).value;
+                            }
+                            return code;
+                        }
+                    });
+                    return marked.parse(text);
+                }
+            } catch (_) {}
+            return text.replace(/\n/g, '<br>');
+        }
+
+        function toggleStepDetail(stepId) {
+            const body = document.getElementById(stepId);
+            if (body) {
+                body.style.display = (body.style.display === 'none') ? 'block' : 'none';
+            }
+        }
+
+        async function sendAgentMessage() {
+            if (isAgentRunning) return;
+            const input = document.getElementById('agent-input');
+            const prompt = input.value.trim();
+            if (!prompt) return;
+
+            input.value = '';
+            isAgentRunning = true;
+            document.getElementById('agent-btn-send').disabled = true;
+
+            const box = document.getElementById('agent-messages-box');
+
+            // 1. Render User Message
+            agentChatHistory.push({ role: 'user', content: prompt });
+            const userHtml = `
+                <div class="agy-msg-row user">
+                    <div class="agy-msg-body">
+                        <div class="agy-msg-text">${prompt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                    </div>
+                    <div class="agy-avatar user"><i class="fa-solid fa-user"></i></div>
+                </div>
+            `;
+            box.insertAdjacentHTML('beforeend', userHtml);
+
+            // 2. Render Loading Indicator
+            const loadingId = 'agy-loading-' + Date.now();
+            const loadingHtml = `
+                <div class="agy-msg-row" id="${loadingId}">
+                    <div class="agy-avatar assistant"><i class="fa-solid fa-atom"></i></div>
+                    <div class="agy-msg-body">
+                        <div class="agy-loading-pill">
+                            <div class="agy-pulse-dot"></div>
+                            <span>Antigravity sedang bernalar &amp; mengeksekusi tool sistem...</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            box.insertAdjacentHTML('beforeend', loadingHtml);
+            box.scrollTop = box.scrollHeight;
+
+            const selectedModel = document.getElementById('agent-model').value || 'deepseek-v4.1-flash-free';
+
+            try {
+                const res = await fetch('/api/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: agentChatHistory,
+                        model: selectedModel
+                    })
+                });
+
+                const data = await res.json();
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+
+                if (data.status !== 'ok') {
+                    const errHtml = `
+                        <div class="agy-msg-row">
+                            <div class="agy-avatar assistant"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i></div>
+                            <div class="agy-msg-body">
+                                <div class="agy-msg-text" style="border-color:#ef4444; color:#fca5a5;">
+                                    <b>Error:</b> ${data.error || 'Gagal memproses permintaan.'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    box.insertAdjacentHTML('beforeend', errHtml);
+                    return;
+                }
+
+                // Add to history
+                agentChatHistory.push({ role: 'assistant', content: data.reply });
+
+                // Build Step Accordions
+                let stepsHtml = '';
+                if (data.steps && data.steps.length > 0) {
+                    data.steps.forEach((st, idx) => {
+                        const stepId = `step-detail-${Date.now()}-${idx}`;
+                        let toolIcon = 'fa-gear';
+                        if (st.tool === 'read_file') toolIcon = 'fa-file-lines';
+                        if (st.tool === 'write_file' || st.tool === 'edit_file') toolIcon = 'fa-file-pen';
+                        if (st.tool === 'list_dir') toolIcon = 'fa-folder-open';
+                        if (st.tool === 'restart_service') toolIcon = 'fa-rotate';
+                        if (st.tool === 'service_status') toolIcon = 'fa-server';
+
+                        let summaryText = st.thought || `${st.tool}`;
+                        let outputStr = JSON.stringify(st.result, null, 2);
+
+                        stepsHtml += `
+                            <div class="agy-step-card">
+                                <div class="agy-step-header" onclick="toggleStepDetail('${stepId}')">
+                                    <div class="agy-step-title">
+                                        <i class="fa-solid ${toolIcon} text-purple-400"></i>
+                                        <span class="agy-step-badge">${st.tool}</span>
+                                        <span style="color:#cbd5e1; font-weight:500;">${summaryText}</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="color:#4ade80; font-size:10px;"><i class="fa-solid fa-check"></i> Selesai</span>
+                                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                                    </div>
+                                </div>
+                                <div id="${stepId}" class="agy-step-content" style="display:none;">
+                                    <div style="color:#93c5fd; margin-bottom:4px;"><b>Args:</b> ${JSON.stringify(st.args)}</div>
+                                    <div style="color:#94a3b8;"><b>Output:</b>\n${outputStr}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                const renderedMarkdown = renderMarkdown(data.reply);
+                const assistantHtml = `
+                    <div class="agy-msg-row">
+                        <div class="agy-avatar assistant"><i class="fa-solid fa-atom"></i></div>
+                        <div class="agy-msg-body">
+                            ${stepsHtml}
+                            <div class="agy-msg-text">
+                                ${renderedMarkdown}
+                            </div>
+                            <div style="font-size:10px; color:#64748b; font-family:'Share Tech Mono', monospace;">
+                                Model: <b>${data.model || selectedModel}</b> via Bansos Gateway
+                            </div>
+                        </div>
+                    </div>
+                `;
+                box.insertAdjacentHTML('beforeend', assistantHtml);
+
+            } catch (err) {
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+                box.insertAdjacentHTML('beforeend', `
+                    <div class="agy-msg-row">
+                        <div class="agy-avatar assistant"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i></div>
+                        <div class="agy-msg-body">
+                            <div class="agy-msg-text" style="border-color:#ef4444; color:#fca5a5;">
+                                <b>Network Error:</b> ${err.message}
+                            </div>
+                        </div>
+                    </div>
+                `);
+            } finally {
+                isAgentRunning = false;
+                document.getElementById('agent-btn-send').disabled = false;
+                box.scrollTop = box.scrollHeight;
+            }
+        }
+
+        // Initial Load
+        loadSysInfo();
+    </script>
+</body>
+</html>

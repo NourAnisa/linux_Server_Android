@@ -1,0 +1,24 @@
+{
+  "name": "tinycore-desktop",
+  "version": "1.5.0",
+  "description": "TinyCore Linux Web GUI Desktop with Autonomous Antigravity AI Code Assistant",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"console.log('Testing server syntax...'); require('./server.js');\""
+  },
+  "keywords": [
+    "tinycore",
+    "web-desktop",
+    "antigravity",
+    "ai-agent",
+    "virtual-services",
+    "ttyd",
+    "arm64"
+  ],
+  "author": "Ir. Nor Anisa, S.Kom., M.Kom.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
