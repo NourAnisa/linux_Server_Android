@@ -634,6 +634,117 @@
         }
 
         /* Pulse / Loading status */
+        
+        /* Dynamic Top Progress Bar */
+        .agy-top-progress {
+            height: 3px;
+            width: 100%;
+            background: rgba(168, 85, 247, 0.15);
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+        .agy-progress-bar-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 35%;
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #38bdf8);
+            border-radius: 2px;
+            animation: agyIndeterminate 1.5s infinite ease-in-out;
+        }
+        @keyframes agyIndeterminate {
+            0% { left: -35%; width: 25%; }
+            50% { left: 35%; width: 45%; }
+            100% { left: 100%; width: 25%; }
+        }
+
+        /* Rich Animated Loading Progress Card */
+        .agy-loading-card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(168, 85, 247, 0.45);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 280px;
+            max-width: 480px;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+            animation: fadeIn 0.2s ease;
+        }
+        .agy-loading-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .agy-loading-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .agy-pulse-ring {
+            width: 10px;
+            height: 10px;
+            background: #a855f7;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.8);
+            animation: pulseRing 1.4s infinite cubic-bezier(0.66, 0, 0, 1);
+            flex-shrink: 0;
+        }
+        @keyframes pulseRing {
+            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.8); }
+            70% { box-shadow: 0 0 0 8px rgba(168, 85, 247, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+        }
+        .agy-loading-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .agy-loading-timer {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .agy-loading-step-text {
+            font-size: 12px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .agy-loading-bar-track {
+            height: 4px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .agy-loading-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, #9333ea, #c084fc, #38bdf8);
+            border-radius: 2px;
+            animation: agyFillAnim 1.6s infinite ease-in-out;
+        }
+        @keyframes agyFillAnim {
+            0% { left: -40%; width: 30%; }
+            50% { left: 35%; width: 50%; }
+            100% { left: 100%; width: 30%; }
+        }
+
         .agy-loading-pill {
             display: inline-flex;
             align-items: center;
@@ -987,6 +1098,11 @@
                     <span style="font-family:'Share Tech Mono', monospace; font-size:11px; color:#a5f3fc;"><i class="fa-solid fa-key"></i> bansos</span>
                     <button onclick="clearAgentChat()" style="background:#1e293b; color:#cbd5e1; border:1px solid #475569; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i> Reset</button>
                 </div>
+            </div>
+
+            <!-- Top Active Progress Bar -->
+            <div id="agy-top-progress" class="agy-top-progress" style="display: none;">
+                <div class="agy-progress-bar-inner"></div>
             </div>
 
             <!-- Agent Chat Box -->
@@ -1620,21 +1736,61 @@
             `;
             box.insertAdjacentHTML('beforeend', userHtml);
 
-            // 2. Render Loading Indicator
+            // 2. Render Rich Animated Loading Progress Card
             const loadingId = 'agy-loading-' + Date.now();
             const loadingHtml = `
                 <div class="agy-msg-row" id="${loadingId}">
-                    <div class="agy-avatar assistant"><i class="fa-solid fa-atom"></i></div>
+                    <div class="agy-avatar assistant"><i class="fa-solid fa-atom fa-spin text-purple-400"></i></div>
                     <div class="agy-msg-body">
-                        <div class="agy-loading-pill">
-                            <div class="agy-pulse-dot"></div>
-                            <span>JokiCoding AI sedang bernalar &amp; mengeksekusi tool sistem...</span>
+                        <div class="agy-loading-card">
+                            <div class="agy-loading-header">
+                                <div class="agy-loading-title-wrap">
+                                    <div class="agy-pulse-ring"></div>
+                                    <span class="agy-loading-title">JokiCoding AI sedang bekerja...</span>
+                                </div>
+                                <span class="agy-loading-timer" id="${loadingId}-timer">0s</span>
+                            </div>
+                            <div class="agy-loading-step-text" id="${loadingId}-step">
+                                <i class="fa-solid fa-gear fa-spin mr-1.5 text-purple-400"></i> Menganalisis instruksi &amp; konteks server...
+                            </div>
+                            <div class="agy-loading-bar-track">
+                                <div class="agy-loading-bar-fill"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
             box.insertAdjacentHTML('beforeend', loadingHtml);
             box.scrollTop = box.scrollHeight;
+
+            // Show top progress bar & animate button
+            const topProgressEl = document.getElementById('agy-top-progress');
+            if (topProgressEl) topProgressEl.style.display = 'block';
+            const btnSendEl = document.getElementById('agent-btn-send');
+            if (btnSendEl) {
+                btnSendEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+            }
+
+            // Start live elapsed timer & dynamic step progress
+            let elapsedSec = 0;
+            const progressSteps = [
+                'Menganalisis instruksi &amp; konteks server...',
+                'Memeriksa struktur file &amp; kode program...',
+                'Mengeksekusi tool sistem di /var/www...',
+                'Menerapkan perbaikan kode &amp; validasi...',
+                'Menyusun respons akhir &amp; laporan...'
+            ];
+            const timerInterval = setInterval(() => {
+                elapsedSec++;
+                const timerEl = document.getElementById(`${loadingId}-timer`);
+                const stepEl = document.getElementById(`${loadingId}-step`);
+                if (timerEl) timerEl.textContent = elapsedSec + 's';
+                if (stepEl) {
+                    const stepIdx = Math.min(Math.floor(elapsedSec / 4), progressSteps.length - 1);
+                    stepEl.innerHTML = `<i class="fa-solid fa-gear fa-spin mr-1.5 text-purple-400"></i> ${progressSteps[stepIdx]}`;
+                }
+                box.scrollTop = box.scrollHeight;
+            }, 1000);
 
             const selectedModel = document.getElementById('agent-model').value || 'deepseek-v4.1-flash-free';
 
@@ -1649,6 +1805,12 @@
                 });
 
                 const data = await res.json();
+                clearInterval(timerInterval);
+                if (topProgressEl) topProgressEl.style.display = 'none';
+                if (btnSendEl) {
+                    btnSendEl.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim';
+                    btnSendEl.disabled = false;
+                }
                 const loadingEl = document.getElementById(loadingId);
                 if (loadingEl) loadingEl.remove();
 
@@ -1725,6 +1887,12 @@
                 box.insertAdjacentHTML('beforeend', assistantHtml);
 
             } catch (err) {
+                clearInterval(timerInterval);
+                if (topProgressEl) topProgressEl.style.display = 'none';
+                if (btnSendEl) {
+                    btnSendEl.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim';
+                    btnSendEl.disabled = false;
+                }
                 const loadingEl = document.getElementById(loadingId);
                 if (loadingEl) loadingEl.remove();
                 box.insertAdjacentHTML('beforeend', `

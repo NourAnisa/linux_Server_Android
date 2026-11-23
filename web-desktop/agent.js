@@ -203,6 +203,35 @@ async function executeTool(toolName, args) {
 function extractJSONObjects(str) {
     if (!str) return [];
     const results = [];
+    // Check for DeepSeek DSML format: < | DSML | calls> ... </ | DSML | calls>
+    const dsmlInvokeRegex = /<\s*\|\s*DSML\s*\|\s*invoke\s+name=["']([^"']+)["']\s*>([\s\S]*?)<\s*\/\s*\|\s*DSML\s*\|\s*invoke\s*>/gi;
+    let dsmlMatch;
+    while ((dsmlMatch = dsmlInvokeRegex.exec(str)) !== null) {
+        const toolName = dsmlMatch[1];
+        const paramsBody = dsmlMatch[2];
+        const args = {};
+        const paramRegex = /<\s*\|\s*DSML\s*\|\s*parameter\s+name=["']([^"']+)["'][^>]*>([\s\S]*?)<\s*\/\s*\|\s*DSML\s*\|\s*parameter\s*>/gi;
+        let paramMatch;
+        while ((paramMatch = paramRegex.exec(paramsBody)) !== null) {
+            const paramName = paramMatch[1];
+            let val = paramMatch[2].trim();
+            if (val === 'true') val = true;
+            else if (val === 'false') val = false;
+            else if (/^\d+$/.test(val)) val = parseInt(val, 10);
+            else if (/^\d+\.\d+$/.test(val)) val = parseFloat(val);
+            args[paramName] = val;
+        }
+        results.push({
+            thought: `Menjalankan tool ${toolName} pada sistem`,
+            tool: toolName,
+            args: args
+        });
+    }
+
+    if (results.length > 0) {
+        return results;
+    }
+
 
     const codeBlockMatch = str.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (codeBlockMatch) {
