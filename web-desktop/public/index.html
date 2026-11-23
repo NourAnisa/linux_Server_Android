@@ -702,6 +702,135 @@
             box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4);
             transform: translateY(-1px);
         }
+        
+        /* Attach Button & Multimodal Upload */
+        .agy-btn-attach {
+            background: #141b2d;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #94a3b8;
+            border-radius: 8px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .agy-btn-attach:hover {
+            background: #1e293b;
+            color: #c084fc;
+            border-color: #a855f7;
+            transform: translateY(-1px);
+        }
+        .agy-input-container.agy-drop-active {
+            border: 2px dashed #a855f7 !important;
+            background: rgba(168, 85, 247, 0.08) !important;
+        }
+        .agy-image-preview-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 2px;
+            animation: fadeIn 0.2s ease;
+        }
+        .agy-preview-thumbnail-wrap {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+            background: #000;
+        }
+        .agy-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .agy-preview-remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #f87171;
+            border: none;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.2s;
+        }
+        .agy-preview-remove-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+        .agy-preview-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+            flex: 1;
+        }
+        .agy-preview-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #f1f5f9;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 280px;
+        }
+        .agy-preview-size {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        .agy-preview-badge {
+            font-size: 10px;
+            color: #c084fc;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+        /* User Image Message Bubble */
+        .agy-msg-image-wrap {
+            margin-bottom: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 320px;
+            max-height: 220px;
+            background: #000000;
+            display: inline-block;
+        }
+        .agy-msg-image {
+            max-width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            display: block;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .agy-msg-image:hover {
+            transform: scale(1.02);
+        }
+
         .agy-btn-send:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -767,6 +896,7 @@
                 <div class="agy-selector-group">
                     <span style="color:#94a3b8;"><i class="fa-solid fa-brain text-purple-400"></i> Model:</span>
                     <select id="agent-model" class="agy-select">
+                        <option value="nemotron-3.5-super-vl-free">Nemotron 3.5 Super VL (Multimodal Vision)</option>
                         <option value="deepseek-v4.1-flash-free" selected>DeepSeek V4.1 Flash (Reasoning + Code)</option>
                         <option value="ovh/Mistral-Small-3.2-24B-Instruct-2506">Mistral Small 3.2 24B (OVH Cloud)</option>
                         <option value="ovh/Meta-Llama-3_3-70B-Instruct">Meta Llama 3.3 70B (OVH Cloud)</option>
@@ -818,9 +948,29 @@
                 </div>
 
                 <!-- Input Field -->
-                <div class="agy-input-container">
+                <div class="agy-input-container" id="agent-input-container">
+                    <!-- Image Preview Container (Hidden when no image) -->
+                    <div id="agent-image-preview-bar" class="agy-image-preview-bar" style="display: none;">
+                        <div class="agy-preview-thumbnail-wrap">
+                            <img id="agent-image-preview-img" src="" alt="Lampiran" class="agy-preview-img" />
+                            <button type="button" class="agy-preview-remove-btn" onclick="clearAttachedImage()" title="Hapus Gambar">✕</button>
+                        </div>
+                        <div class="agy-preview-info">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span id="agent-image-name" class="agy-preview-name">screenshot.png</span>
+                                <span id="agent-image-size" class="agy-preview-size">0 KB</span>
+                            </div>
+                            <span class="agy-preview-badge"><i class="fa-solid fa-eye"></i> Multimodal Vision Aktif &bull; Nemotron 3.5 Super VL</span>
+                        </div>
+                    </div>
+
                     <div class="agy-input-row">
-                        <textarea id="agent-input" class="agy-textarea" placeholder="Tulis instruksi perbaikan atau keluhan sistem (misal: 'Cek kenapa openqris gagal kirim webhook dan perbaiki kode dispatcher-nya')..." rows="1" onkeydown="handleAgentInputKeyDown(event)"></textarea>
+                        <!-- Attachment Button -->
+                        <input type="file" id="agent-file-input" accept="image/*" style="display:none;" onchange="handleAgentFileSelected(event)" />
+                        <button type="button" class="agy-btn-attach" onclick="document.getElementById('agent-file-input').click()" title="Lampirkan Gambar atau Screenshot">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </button>
+                        <textarea id="agent-input" class="agy-textarea" placeholder="Tulis instruksi atau tempel gambar (Ctrl+V) / klik klip untuk upload screenshot..." rows="1" onkeydown="handleAgentInputKeyDown(event)"></textarea>
                         <button id="agent-btn-send" class="agy-btn-send" onclick="sendAgentMessage()">
                             <i class="fa-solid fa-paper-plane"></i> Kirim
                         </button>
@@ -1123,6 +1273,108 @@
         // JOKICODING AI AGENT CLIENT CODE
         // ========================================================
         let agentChatHistory = [];
+
+        // Multimodal Image Attachment State
+        let attachedImageDataUrl = null;
+        let attachedImageName = '';
+        let attachedImageSize = '';
+
+        function handleAgentFileSelected(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            processImageFile(file);
+        }
+
+        function processImageFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Harap pilih file gambar (PNG, JPG, WebP, GIF).');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran gambar maksimal 5 MB.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                attachedImageDataUrl = e.target.result;
+                attachedImageName = file.name || ('screenshot_' + Date.now() + '.png');
+                attachedImageSize = (file.size / 1024).toFixed(1) + ' KB';
+                showImagePreview(attachedImageDataUrl, attachedImageName, attachedImageSize);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showImagePreview(url, name, size) {
+            const previewBar = document.getElementById('agent-image-preview-bar');
+            const previewImg = document.getElementById('agent-image-preview-img');
+            const nameEl = document.getElementById('agent-image-name');
+            const sizeEl = document.getElementById('agent-image-size');
+            if (previewBar && previewImg) {
+                previewImg.src = url;
+                if (nameEl) nameEl.textContent = name;
+                if (sizeEl) sizeEl.textContent = size;
+                previewBar.style.display = 'flex';
+            }
+            // Auto switch model dropdown to vision model if user hasn't selected another
+            const modelSelect = document.getElementById('agent-model');
+            if (modelSelect) {
+                modelSelect.value = 'nemotron-3.5-super-vl-free';
+            }
+        }
+
+        function clearAttachedImage() {
+            attachedImageDataUrl = null;
+            attachedImageName = '';
+            attachedImageSize = '';
+            const fileInput = document.getElementById('agent-file-input');
+            if (fileInput) fileInput.value = '';
+            const previewBar = document.getElementById('agent-image-preview-bar');
+            if (previewBar) previewBar.style.display = 'none';
+        }
+
+        // Setup Paste & Drag-Drop Listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            const inputEl = document.getElementById('agent-input');
+            if (inputEl) {
+                inputEl.addEventListener('paste', (e) => {
+                    const items = (e.clipboardData || window.clipboardData).items;
+                    if (items) {
+                        for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                                const file = items[i].getAsFile();
+                                if (file) {
+                                    processImageFile(file);
+                                    e.preventDefault();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const dropZone = document.getElementById('agent-input-container') || document.querySelector('.agy-input-container');
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('agy-drop-active');
+                });
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('agy-drop-active');
+                });
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('agy-drop-active');
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        const file = e.dataTransfer.files[0];
+                        if (file.type.startsWith('image/')) {
+                            processImageFile(file);
+                        }
+                    }
+                });
+            }
+        });
+
         let isAgentRunning = false;
 
         function clearAgentChat() {
@@ -1194,20 +1446,45 @@
         async function sendAgentMessage() {
             if (isAgentRunning) return;
             const input = document.getElementById('agent-input');
-            const prompt = input.value.trim();
-            if (!prompt) return;
+            let prompt = input.value.trim();
+            const imageToSend = attachedImageDataUrl;
+
+            if (!prompt && !imageToSend) return;
+
+            if (!prompt && imageToSend) {
+                prompt = 'Tolong periksa dan analisis gambar/screenshot yang saya lampirkan ini.';
+            }
 
             input.value = '';
+            clearAttachedImage();
+
             isAgentRunning = true;
             document.getElementById('agent-btn-send').disabled = true;
 
             const box = document.getElementById('agent-messages-box');
 
-            // 1. Render User Message
-            agentChatHistory.push({ role: 'user', content: prompt });
+            // 1. Render User Message with Optional Image Thumbnail
+            let msgContentPayload;
+            let imageBubbleHtml = '';
+            if (imageToSend) {
+                msgContentPayload = [
+                    { type: 'text', text: prompt },
+                    { type: 'image_url', image_url: { url: imageToSend } }
+                ];
+                imageBubbleHtml = `
+                    <div class="agy-msg-image-wrap">
+                        <img src="${imageToSend}" class="agy-msg-image" onclick="window.open(this.src)" title="Klik untuk membuka ukuran penuh" alt="Screenshot lampiran" />
+                    </div>
+                `;
+            } else {
+                msgContentPayload = prompt;
+            }
+
+            agentChatHistory.push({ role: 'user', content: msgContentPayload });
             const userHtml = `
                 <div class="agy-msg-row user">
                     <div class="agy-msg-body">
+                        ${imageBubbleHtml}
                         <div class="agy-msg-text">${prompt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
                     </div>
                     <div class="agy-avatar user"><i class="fa-solid fa-user"></i></div>

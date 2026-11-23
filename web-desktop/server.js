@@ -133,6 +133,7 @@ const server = http.createServer((req, res) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 data: [
+                    { id: 'nemotron-3.5-super-vl-free', name: 'NVIDIA Nemotron 3.5 Super VL (Multimodal Vision)' },
                     { id: 'deepseek-v4.1-flash-free', name: 'DeepSeek V4.1 Flash (Reasoning + Code)' },
                     { id: 'ovh/Mistral-Small-3.2-24B-Instruct-2506', name: 'Mistral Small 3.2 24B (OVH Cloud)' },
                     { id: 'ovh/Meta-Llama-3_3-70B-Instruct', name: 'Meta Llama 3.3 70B (OVH Cloud)' },

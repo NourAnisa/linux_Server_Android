@@ -15,14 +15,20 @@ const FALLBACK_MODELS = [
     'kilo-auto/free'
 ];
 
+const VISION_MODELS = [
+    'nemotron-3.5-super-vl-free',
+    'nvidia/nemotron-3.5-super-vl:free',
+    'ovh/Qwen2.5-VL-72B-Instruct'
+];
+
 const SYSTEM_PROMPT = `Anda adalah JokiCoding AI, asisten AI otonom rekayasa perangkat lunak dan manajemen server tingkat lanjut di server TinyCore Linux (Redmi Note 9 ARM64).
-Anda memiliki akses dan wewenang penuh untuk memeriksa sistem, mendiagnosis masalah, mengedit kode, dan mengelola semua service di /var/www:
+Anda memiliki kemampuan multimodal (membaca teks & menganalisis gambar/screenshot/diagram), serta wewenang penuh untuk memeriksa sistem, mendiagnosis masalah, mengedit kode, dan mengelola semua service di /var/www:
 1. /var/www/openqris (Port 5060) - SaaS Payment Gateway 0% MDR (Node 22, SQLite, GoBiz poller, Snap UI).
 2. /var/www/gopay-gateway (Port 3005) - GoBiz QRIS internal gateway (Bit & Bean).
 3. /var/www/openjob (Port 5050) - Portal lowongan kerja & magang otomatis (Python Flask).
 4. /var/www/openjurnal (Port 7860) - Portal riset literatur ilmiah & jurnal (Python Flask).
 5. /var/www/openplag (Port 5000) - Portal cek plagiarisme & deteksi AI (Python Flask).
-6. /var/www/openstalker - Layanan OSINT & profil (Python).
+6. /var/www/openstalker (Port 5080) - Layanan OSINT & profil jejak digital (Python Flask).
 7. /var/www/nadia-wa - Bot WhatsApp CS Nadia (0851-5513-3070) & Telegram @noranisa_bot.
 8. /var/www/tinycore-desktop (Port 7681) - Web Desktop Linux GUI & aterm ttyd (Port 7682).
 9. /var/www/bansos-router (Port 17070) - Bansos AI Multi-model Gateway.
@@ -55,6 +61,7 @@ DAFTAR TOOL:
 
 ATURAN UTAMA:
 - Selalu panggil pengguna dengan hangat dan hormat sebagai Bu Anisa.
+- Jika pengguna mengunggah screenshot atau gambar, analisis visualnya dengan cermat (baca teks error, elemen UI, atau pesan log yang tertera).
 - Saat melakukan tindakan perbaikan, buktikan dengan membaca file / melihat proses terlebih dahulu.
 - Setelah selesai menjalankan tool yang diperlukan, berikan jawaban akhir dalam format Markdown yang rapi dan solutif TANPA menyertakan blok tool call lagi.`;
 
@@ -165,10 +172,12 @@ async function executeTool(toolName, args) {
                     restartCmd = "pkill -f 'openjurnal/app.py' || true; sleep 1; nohup python3 /var/www/openjurnal/app.py > /var/log/openjurnal.log 2>&1 &";
                 } else if (svc === 'openplag') {
                     restartCmd = "pkill -f 'openplag/app.py' || true; sleep 1; nohup python3 /var/www/openplag/app.py > /var/log/openplag.log 2>&1 &";
+                } else if (svc === 'openstalker') {
+                    restartCmd = "pkill -f 'openstalker/app.py' || true; sleep 1; nohup python3 /var/www/openstalker/app.py > /var/log/openstalker.log 2>&1 &";
                 } else if (svc === 'tinycore-desktop') {
                     restartCmd = "pkill -f 'tinycore-desktop/server.js' || true; sleep 1; nohup node /var/www/tinycore-desktop/server.js > /var/log/tinycore.log 2>&1 &";
                 } else {
-                    return { error: `Unknown service: ${svc}. Supported: openqris, gopay-gateway, openjob, openjurnal, openplag, tinycore-desktop` };
+                    return { error: `Unknown service: ${svc}. Supported: openqris, gopay-gateway, openjob, openjurnal, openplag, openstalker, tinycore-desktop` };
                 }
 
                 return new Promise((resolve) => {
@@ -195,7 +204,6 @@ function extractJSONObjects(str) {
     if (!str) return [];
     const results = [];
 
-    // First check code blocks
     const codeBlockMatch = str.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (codeBlockMatch) {
         try {
@@ -251,13 +259,16 @@ function extractJSONObjects(str) {
 }
 
 // Call LLM endpoint with automatic fallback across providers
-async function callLLM(messages, preferredModel = DEFAULT_MODEL) {
-    const candidateModels = [preferredModel, ...FALLBACK_MODELS.filter(m => m !== preferredModel)];
+async function callLLM(messages, preferredModel = DEFAULT_MODEL, isVision = false) {
+    const candidateList = isVision
+        ? Array.from(new Set(VISION_MODELS.includes(preferredModel) ? [preferredModel, ...VISION_MODELS] : [...VISION_MODELS]))
+        : Array.from(new Set([preferredModel, ...FALLBACK_MODELS]));
+
     let lastError = null;
 
-    for (const model of candidateModels) {
+    for (const model of candidateList) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 20000);
+        const timeout = setTimeout(() => controller.abort(), 28000);
 
         try {
             const res = await fetch(`${BANSOS_BASE_URL}/chat/completions`, {
@@ -302,6 +313,10 @@ async function callLLM(messages, preferredModel = DEFAULT_MODEL) {
 
 // Run Agent Turn (multi-step tool loop)
 async function runAgentTurn({ messages, model = DEFAULT_MODEL, onStep }) {
+    // Detect if user has attached an image
+    const hasImage = messages.some(m => Array.isArray(m.content) && m.content.some(c => c.type === 'image_url'));
+    let usedModel = hasImage ? (VISION_MODELS.includes(model) ? model : 'nemotron-3.5-super-vl-free') : model;
+
     const conversation = [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages
@@ -310,11 +325,10 @@ async function runAgentTurn({ messages, model = DEFAULT_MODEL, onStep }) {
     const steps = [];
     const maxSteps = 5;
     let turn = 0;
-    let usedModel = model;
 
     while (turn < maxSteps) {
         turn++;
-        const llmResult = await callLLM(conversation, usedModel);
+        const llmResult = await callLLM(conversation, usedModel, hasImage);
         const assistantReply = llmResult.content;
         usedModel = llmResult.activeModel;
 
@@ -382,5 +396,6 @@ module.exports = {
     SYSTEM_PROMPT,
     DEFAULT_MODEL,
     FALLBACK_MODELS,
+    VISION_MODELS,
     BANSOS_BASE_URL
 };
