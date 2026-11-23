@@ -15,7 +15,7 @@ bansos restart || (bansos stop && sleep 1 && bansos start) || true
 echo "=========================================================="
 echo "🚀 2. Memasang OpenCode CLI..."
 echo "=========================================================="
-npm install -g @opencode/cli@latest
+npm install -g @opencode/cli@latest agentic-seo@latest
 
 echo "=========================================================="
 echo "✅ Pembaruan Selesai!"

@@ -1123,6 +1123,9 @@
                         <p>Halo Bu Anisa! Saya adalah JokiCoding AI, asisten yang terhubung langsung ke sistem server Redmi Note 9 dan seluruh repositori di <code>/var/www</code> (OpenQRIS, GoPay Gateway, OpenJob, OpenJurnal, OpenPlag, TinyCore Desktop). Silakan perintahkan saya untuk memeriksa bug, memperbaiki kode, atau mengelola service.</p>
                         
                         <div class="agy-quick-chips">
+                            <div class="agy-chip" onclick="quickSend('Audit SEO & AI Visibility (AEO) untuk layanan web di /var/www (OpenQRIS, OpenJob, OpenPlag) menggunakan standar Addy Osmani agentic-seo dan RankSpot')">
+                                <i class="fa-solid fa-chart-line text-cyan-400"></i> Audit SEO & AEO AI
+                            </div>
                             <div class="agy-chip" onclick="quickSend('Audit status semua service yang berjalan di /var/www dan cek apakah ada proses yang mati')">
                                 <i class="fa-solid fa-stethoscope text-emerald-400"></i> Audit Semua Service
                             </div>
@@ -1394,7 +1397,55 @@
         window.addEventListener('resize', () => {
             initResponsiveWindows();
         });
+        
+        // Fetch All 36+ Dynamic Models from Bansos Gateway
+        async function loadDynamicBansosModels() {
+            const select = document.getElementById('agent-model');
+            if (!select) return;
+            try {
+                const res = await fetch('/api/agent/models');
+                if (!res.ok) return;
+                const json = await res.json();
+                const models = json.data || [];
+                if (!models.length) return;
+
+                const currentVal = select.value;
+                select.innerHTML = '';
+                
+                const bansosGroup = document.createElement('optgroup');
+                bansosGroup.label = `Bansos AI Gateway (${models.length} Model Aktif)`;
+                
+                models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.name || m.id;
+                    if (m.id === currentVal || m.id === 'deepseek-v4.1-flash-free') {
+                        opt.selected = true;
+                    }
+                    bansosGroup.appendChild(opt);
+                });
+                select.appendChild(bansosGroup);
+
+                const geminiGroup = document.createElement('optgroup');
+                geminiGroup.label = 'Google Gemini Engine (Kunci Resmi Bu Anisa)';
+                const g1 = document.createElement('option');
+                g1.value = 'gemini-1.5-flash';
+                g1.textContent = 'Google Gemini 1.5 Flash (Ultra Cepat)';
+                const g2 = document.createElement('option');
+                g2.value = 'gemini-1.5-pro';
+                g2.textContent = 'Google Gemini 1.5 Pro (1M Context)';
+                geminiGroup.appendChild(g1);
+                geminiGroup.appendChild(g2);
+                select.appendChild(geminiGroup);
+
+                console.log(`[JokiCoding AI] Loaded ${models.length} models dynamically from Bansos Gateway!`);
+            } catch (err) {
+                console.warn('Gagal memuat model dinamis:', err);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            loadDynamicBansosModels();
             initResponsiveWindows();
         });
 
@@ -1599,7 +1650,55 @@
         }
 
         // Setup Paste & Drag-Drop Listeners
+        
+        // Fetch All 36+ Dynamic Models from Bansos Gateway
+        async function loadDynamicBansosModels() {
+            const select = document.getElementById('agent-model');
+            if (!select) return;
+            try {
+                const res = await fetch('/api/agent/models');
+                if (!res.ok) return;
+                const json = await res.json();
+                const models = json.data || [];
+                if (!models.length) return;
+
+                const currentVal = select.value;
+                select.innerHTML = '';
+                
+                const bansosGroup = document.createElement('optgroup');
+                bansosGroup.label = `Bansos AI Gateway (${models.length} Model Aktif)`;
+                
+                models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.name || m.id;
+                    if (m.id === currentVal || m.id === 'deepseek-v4.1-flash-free') {
+                        opt.selected = true;
+                    }
+                    bansosGroup.appendChild(opt);
+                });
+                select.appendChild(bansosGroup);
+
+                const geminiGroup = document.createElement('optgroup');
+                geminiGroup.label = 'Google Gemini Engine (Kunci Resmi Bu Anisa)';
+                const g1 = document.createElement('option');
+                g1.value = 'gemini-1.5-flash';
+                g1.textContent = 'Google Gemini 1.5 Flash (Ultra Cepat)';
+                const g2 = document.createElement('option');
+                g2.value = 'gemini-1.5-pro';
+                g2.textContent = 'Google Gemini 1.5 Pro (1M Context)';
+                geminiGroup.appendChild(g1);
+                geminiGroup.appendChild(g2);
+                select.appendChild(geminiGroup);
+
+                console.log(`[JokiCoding AI] Loaded ${models.length} models dynamically from Bansos Gateway!`);
+            } catch (err) {
+                console.warn('Gagal memuat model dinamis:', err);
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            loadDynamicBansosModels();
             const inputEl = document.getElementById('agent-input');
             if (inputEl) {
                 inputEl.addEventListener('paste', (e) => {
@@ -1652,7 +1751,10 @@
                     <h3>JokiCoding AI Autonomous Coding Assistant</h3>
                     <p>Halo Bu Anisa! Obrolan telah direset. Silakan perintahkan saya untuk memeriksa bug, membaca kode, atau mengelola service di <code>/var/www</code>.</p>
                     <div class="agy-quick-chips">
-                        <div class="agy-chip" onclick="quickSend('Audit status semua service yang berjalan di /var/www dan cek apakah ada proses yang mati')">
+                        <div class="agy-chip" onclick="quickSend('Audit SEO & AI Visibility (AEO) untuk layanan web di /var/www (OpenQRIS, OpenJob, OpenPlag) menggunakan standar Addy Osmani agentic-seo dan RankSpot')">
+                                <i class="fa-solid fa-chart-line text-cyan-400"></i> Audit SEO & AEO AI
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Audit status semua service yang berjalan di /var/www dan cek apakah ada proses yang mati')">
                             <i class="fa-solid fa-stethoscope text-emerald-400"></i> Audit Semua Service
                         </div>
                         <div class="agy-chip" onclick="quickSend('Periksa status OpenQRIS di /var/www/openqris, cek database sqlite, dan lihat 5 mutasi/order terbaru')">

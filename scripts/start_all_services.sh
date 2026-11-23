@@ -17,7 +17,7 @@ sleep 1
 
 # 2. Update Bansos Router ke 0.6.3 jika belum versi terbaru
 echo "📦 Memeriksa pembaruan Bansos Router & OpenCode..."
-npm install -g bansos-router@latest @opencode/cli@latest >/dev/null 2>&1 || true
+npm install -g bansos-router@latest @opencode/cli@latest agentic-seo@latest >/dev/null 2>&1 || true
 
 # 3. Jalankan Bansos AI Gateway (Port 17070)
 if ! pgrep -f "bansos" >/dev/null 2>&1; then
