@@ -1039,6 +1039,9 @@
             <div class="topbar-menu-item highlight-agy" onclick="toggleWindow('win-antigravity')">
                 <i class="fa-solid fa-atom text-purple-400"></i> JokiCoding AI
             </div>
+            <div class="topbar-menu-item" onclick="launchOpenCode()" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1);">
+                <i class="fa-solid fa-terminal text-cyan-400 mr-1"></i> OpenCode AI
+            </div>
             <div class="topbar-menu-item" onclick="toggleWindow('win-term')"><i class="fa-solid fa-terminal mr-1"></i> aterm</div>
             <div class="topbar-menu-item" onclick="toggleWindow('win-files')"><i class="fa-solid fa-folder-tree mr-1"></i> Files</div>
             <div class="topbar-menu-item" onclick="toggleWindow('win-sys')"><i class="fa-solid fa-gauge-high mr-1"></i> Monitor</div>
@@ -1084,13 +1087,18 @@
                 <div class="agy-selector-group">
                     <span style="color:#94a3b8;"><i class="fa-solid fa-brain text-purple-400"></i> Model:</span>
                     <select id="agent-model" class="agy-select">
-                        <option value="nemotron-3.5-super-vl-free">Nemotron 3.5 Super VL (Multimodal Vision)</option>
-                        <option value="deepseek-v4.1-flash-free" selected>DeepSeek V4.1 Flash (Reasoning + Code)</option>
-                        <option value="ovh/Mistral-Small-3.2-24B-Instruct-2506">Mistral Small 3.2 24B (OVH Cloud)</option>
-                        <option value="ovh/Meta-Llama-3_3-70B-Instruct">Meta Llama 3.3 70B (OVH Cloud)</option>
-                        <option value="nemotron-3.5-lightning-free">NVIDIA Nemotron 3.5 Lightning</option>
-                        <option value="qwen4-max-free">Qwen4 Max Free</option>
-                        <option value="codestral-latest">Codestral Latest (Mistral)</option>
+                        <optgroup label="Bansos AI Gateway (36+ Model Gratis)">
+                            <option value="deepseek-v4.1-flash-free" selected>DeepSeek V4.1 Flash (Reasoning + Code)</option>
+                            <option value="codestral-latest">Codestral Latest (Mistral Specialist)</option>
+                            <option value="nemotron-3.5-super-vl-free">Nemotron 3.5 Super VL (Vision)</option>
+                            <option value="ovh/Meta-Llama-3_3-70B-Instruct">Meta Llama 3.3 70B</option>
+                            <option value="ovh/Mistral-Small-3.2-24B-Instruct-2506">Mistral Small 3.2 24B</option>
+                            <option value="qwen4-max-free">Qwen4 Max Free</option>
+                        </optgroup>
+                        <optgroup label="Google Gemini Engine (Kunci Resmi Bu Anisa)">
+                            <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Ultra Cepat)</option>
+                            <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (1M Context)</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -1415,6 +1423,20 @@
 
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
+        }
+
+        
+        // OpenCode AI Launcher Function
+        function launchOpenCode() {
+            toggleWindow('win-term');
+            const termWin = document.getElementById('win-term');
+            if (termWin) {
+                termWin.style.display = 'flex';
+                bringToFront(termWin);
+            }
+            if (window.termWs && window.termWs.readyState === WebSocket.OPEN) {
+                window.termWs.send("0opencode\r");
+            }
         }
 
         function toggleWindow(winId) {

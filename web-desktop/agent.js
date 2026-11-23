@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 
 const BANSOS_BASE_URL = process.env.BANSOS_BASE_URL || 'http://127.0.0.1:17070/v1';
 const BANSOS_API_KEY = process.env.BANSOS_API_KEY || 'bansos';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const DEFAULT_MODEL = 'deepseek-v4.1-flash-free';
 
 const FALLBACK_MODELS = [
@@ -289,23 +290,31 @@ function extractJSONObjects(str) {
 
 // Call LLM endpoint with automatic fallback across providers
 async function callLLM(messages, preferredModel = DEFAULT_MODEL, isVision = false) {
-    const candidateList = isVision
-        ? Array.from(new Set(VISION_MODELS.includes(preferredModel) ? [preferredModel, ...VISION_MODELS] : [...VISION_MODELS]))
-        : Array.from(new Set([preferredModel, ...FALLBACK_MODELS]));
+    const isGemini = preferredModel.startsWith('gemini');
+    const candidateList = isGemini
+        ? [preferredModel, ...FALLBACK_MODELS]
+        : (isVision
+            ? Array.from(new Set(VISION_MODELS.includes(preferredModel) ? [preferredModel, ...VISION_MODELS] : [...VISION_MODELS]))
+            : Array.from(new Set([preferredModel, ...FALLBACK_MODELS])));
 
     let lastError = null;
 
     for (const model of candidateList) {
+        const targetIsGemini = model.startsWith('gemini') && GEMINI_API_KEY;
+        const targetUrl = targetIsGemini 
+            ? 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
+            : `${BANSOS_BASE_URL}/chat/completions`;
+        const targetKey = targetIsGemini ? GEMINI_API_KEY : BANSOS_API_KEY;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 28000);
 
         try {
-            const res = await fetch(`${BANSOS_BASE_URL}/chat/completions`, {
+            const res = await fetch(targetUrl, {
                 method: 'POST',
                 signal: controller.signal,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${BANSOS_API_KEY}`,
+                    'Authorization': `Bearer ${targetKey}`,
                     'User-Agent': 'JokiCoding-AI-Agent/1.0'
                 },
                 body: JSON.stringify({
