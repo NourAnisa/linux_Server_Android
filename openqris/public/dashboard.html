@@ -335,6 +335,16 @@
     </div>
 
     <script>
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         let authToken = localStorage.getItem('openqris_auth_token');
         let currentData = null;
 
@@ -518,17 +528,17 @@
                     
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50/70 transition">
-                            <td class="py-3 px-3 font-bold text-slate-900">${tx.order_id}</td>
-                            <td class="py-3 px-3 font-sans text-slate-600">${tx.customer_name || '-'}</td>
+                            <td class="py-3 px-3 font-bold text-slate-900">${escapeHtml(tx.order_id)}</td>
+                            <td class="py-3 px-3 font-sans text-slate-600">${escapeHtml(tx.customer_name || '-')}</td>
                             <td class="py-3 px-3 font-bold text-emerald-600">Rp ${Number(tx.gross_amount).toLocaleString('id-ID')}</td>
                             <td class="py-3 px-3">
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusClass}">
-                                    ${tx.transaction_status}
+                                    ${escapeHtml(tx.transaction_status)}
                                 </span>
                             </td>
-                            <td class="py-3 px-3 text-[11px] text-slate-500">${tx.created_at.replace('T', ' ').substring(0, 19)}</td>
+                            <td class="py-3 px-3 text-[11px] text-slate-500">${escapeHtml(tx.created_at.replace('T', ' ').substring(0, 19))}</td>
                             <td class="py-3 px-3 text-right">
-                                <a href="/snap/pay/${tx.snap_token}" target="_blank" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-indigo-600 border border-slate-200 text-[11px] font-semibold transition">
+                                <a href="/snap/pay/${encodeURIComponent(tx.snap_token)}" target="_blank" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-indigo-600 border border-slate-200 text-[11px] font-semibold transition">
                                     Buka QR
                                 </a>
                             </td>

@@ -3,4 +3,9 @@ node_modules/
 Thumbs.db
 *.log
 .env
+.env.*
 .tmp
+*.db
+*.db-shm
+*.db-wal
+*.b64

@@ -10,49 +10,61 @@ const TTYD_PORT = 7682;
 const AUTH_USER = 'admin';
 const AUTH_PASS = 'bansos123';
 
+function isSafePath(inputPath) {
+    if (!inputPath || typeof inputPath !== 'string') return false;
+    if (inputPath.includes('\0')) return false;
+    const resolved = path.resolve(inputPath);
+    return resolved === '/var/www' || resolved.startsWith('/var/www/');
+}
+
+function applySecurityHeaders(res) {
+    if (res && res.setHeader) {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
+}
+
 function checkAuth(req, res) {
     const authHeader = req.headers['authorization'];
-    if (!authHeader) {
-        if (res && res.writeHead) {
-            res.writeHead(401, {
-                'WWW-Authenticate': 'Basic realm="TinyCore Linux Server"',
-                'Content-Type': 'text/plain; charset=utf-8'
-            });
-            res.end('Authentication required');
-        } else if (res && res.write) {
-            res.write('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="TinyCore Linux Server"\r\n\r\n');
-            res.destroy();
+    if (authHeader) {
+        const [scheme, credentials] = authHeader.split(' ');
+        if (scheme === 'Basic' && credentials) {
+            try {
+                const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
+                const [user, pass] = decoded.split(':');
+                if (user === AUTH_USER && pass === AUTH_PASS) {
+                    return true;
+                }
+            } catch (_) {}
         }
-        return false;
     }
-    const [scheme, credentials] = authHeader.split(' ');
-    if (scheme !== 'Basic' || !credentials) {
-        if (res && res.writeHead) {
-            res.writeHead(401, { 'Content-Type': 'text/plain' });
-            res.end('Invalid authorization scheme');
-        } else if (res && res.destroy) {
-            res.destroy();
+
+    // Query fallback: token or key
+    try {
+        const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+        const token = reqUrl.searchParams.get('token') || reqUrl.searchParams.get('key');
+        if (token === AUTH_PASS) {
+            return true;
         }
-        return false;
-    }
-    const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
-    const [user, pass] = decoded.split(':');
-    if (user === AUTH_USER && pass === AUTH_PASS) {
-        return true;
-    }
+    } catch (_) {}
+
     if (res && res.writeHead) {
         res.writeHead(401, {
             'WWW-Authenticate': 'Basic realm="TinyCore Linux Server"',
-            'Content-Type': 'text/plain; charset=utf-8'
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-Content-Type-Options': 'nosniff'
         });
-        res.end('Access Denied');
-    } else if (res && res.destroy) {
+        res.end('Authentication required');
+    } else if (res && res.write) {
+        res.write('HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm="TinyCore Linux Server"\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nAuthentication required');
         res.destroy();
     }
     return false;
 }
 
 const server = http.createServer((req, res) => {
+    applySecurityHeaders(res);
     if (!checkAuth(req, res)) return;
 
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -192,7 +204,7 @@ const server = http.createServer((req, res) => {
     // 6. File Manager API
     if (pathname === '/api/files') {
         const targetDir = url.searchParams.get('dir') || '/var/www';
-        const safeDir = path.resolve(targetDir).startsWith('/var/www') ? targetDir : '/var/www';
+        const safeDir = isSafePath(targetDir) ? path.resolve(targetDir) : '/var/www';
         fs.readdir(safeDir, { withFileTypes: true }, (err, items) => {
             if (err) {
                 res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -210,24 +222,57 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // 6b. Direct Binary File Upload API (100% byte integrity for images/assets)
+    // 6b. Direct Binary File Upload API (with strict traversal defense & quota protection)
     if (pathname === '/api/upload' && req.method === 'POST') {
         const destPath = url.searchParams.get('path');
-        if (!destPath || !path.resolve(destPath).startsWith('/var/www')) {
+        if (!isSafePath(destPath)) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Invalid destination path' }));
+            res.end(JSON.stringify({ error: 'Invalid destination path: must be within /var/www' }));
             return;
         }
-        fs.mkdirSync(path.dirname(destPath), { recursive: true });
-        const fileStream = fs.createWriteStream(destPath);
-        req.pipe(fileStream);
+
+        const resolvedDest = path.resolve(destPath);
+        const base = path.basename(resolvedDest);
+        if (base === '.env' || base === 'id_rsa' || base === 'authorized_keys' || resolvedDest.includes('/.git/')) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Permission denied: direct overwrite of sensitive security files blocked' }));
+            return;
+        }
+
+        fs.mkdirSync(path.dirname(resolvedDest), { recursive: true });
+        const fileStream = fs.createWriteStream(resolvedDest);
+        let uploadedBytes = 0;
+        const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50MB
+        let aborted = false;
+
+        req.on('data', chunk => {
+            uploadedBytes += chunk.length;
+            if (uploadedBytes > MAX_UPLOAD_SIZE && !aborted) {
+                aborted = true;
+                req.destroy();
+                fileStream.destroy();
+                fs.unlink(resolvedDest, () => {});
+                if (!res.headersSent) {
+                    res.writeHead(413, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Payload Too Large: max 50MB permitted' }));
+                }
+            }
+        });
+
+        if (!aborted) {
+            req.pipe(fileStream);
+        }
+
         fileStream.on('finish', () => {
+            if (aborted) return;
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ status: 'ok', path: destPath, size: fileStream.bytesWritten }));
+            res.end(JSON.stringify({ status: 'ok', path: resolvedDest, size: fileStream.bytesWritten }));
         });
         fileStream.on('error', (err) => {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: err.message }));
+            if (!res.headersSent) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: err.message }));
+            }
         });
         return;
     }
@@ -265,6 +310,9 @@ const server = http.createServer((req, res) => {
 
 // WebSocket Proxy for TTYD Terminal
 server.on('upgrade', (req, socket, head) => {
+    // Strictly verify authentication for WebSocket upgrades
+    if (!checkAuth(req, socket)) return;
+
     // Strip /term-embed prefix so ttyd receives /ws or / instead of /term-embed/ws
     let targetUrl = req.url;
     if (targetUrl.startsWith('/term-embed')) {
