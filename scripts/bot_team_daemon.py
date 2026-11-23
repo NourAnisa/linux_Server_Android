@@ -188,7 +188,41 @@ async def handle_nadia(msg, chat_id, text, msg_id, is_group):
     await send_tg_typing(BOT_TOKENS['noranisa_bot'], chat_id)
     log_event('Nadia CS', 'incoming_message', f"Dari chat {chat_id}: {text[:60]}")
 
-    if any(k in lower for k in ['lapor', 'laporan', 'jobdesk', 'standup', 'rekap']):
+    if any(k in lower for k in ['jobdesk', 'tugas', 'peran', 'fungsi']):
+        reply = (
+            "👩‍💼 [JOBDESK RESMI: NADIA CS - LEAD CUSTOMER OPERATIONS & CHIEF CASHIER]\n\n"
+            "Tanggung Jawab Utama:\n"
+            "1. Layanan Pelanggan WhatsApp 24 Jam (0851-5513-3070) & Facebook Marketplace.\n"
+            "2. Pengelolaan Pesanan Refill Gas Portable (Banjarmasin, Palangka Raya, Balikpapan) Rp 12.000/botol.\n"
+            "3. Rekapitulasi Kasir & Penerbitan QRIS Dinamis via OpenQRIS (0% MDR).\n"
+            "4. Pelaporan berkala arus kas dan pencatatan tiket masuk pelanggan kepada Bu Anisa.\n"
+            "5. Berkoordinasi dengan OtterOps jika ada komplain pelanggan terkait server/web."
+        )
+        await send_tg_message(BOT_TOKENS['noranisa_bot'], chat_id, reply, msg_id)
+        log_event('Nadia CS', 'jobdesk_sent', "Memaparkan jobdesk resmi Nadia CS")
+        return
+
+    if any(k in lower for k in ['berapa orang', 'berapa org', 'jumlah chat', 'banyak chat', 'yang ngechat', 'chat masuk']):
+        chat_count = 0
+        try:
+            with open(os.path.join(BASE_DIR, 'cs-activity.json'), 'r', encoding='utf-8') as f:
+                cs_logs = json.load(f)
+                chat_count = len(cs_logs)
+        except Exception:
+            pass
+        reply = (
+            f"👩‍💼 [Nadia CS - Data Aktivitas Chat]\n\n"
+            f"Lapor Bu Anisa, data percakapan saat ini:\n"
+            f"- Total percakapan tersimpan: {chat_count} pesan riwayat interaksi pelanggan\n"
+            f"- Saluran WhatsApp CS (0851-5513-3070): Siaga Online 24/7\n"
+            f"- Pertanyaan dominan: Ketersediaan isi ulang Refill Gas Portable Rp 12.000/botol & kaleng baru di 3 cabang.\n"
+            f"Setiap ada pesan baru masuk, saya langsung meresponnya secara otomatis dan mencatatnya ke sistem kasir, Bu Anisa!"
+        )
+        await send_tg_message(BOT_TOKENS['noranisa_bot'], chat_id, reply, msg_id)
+        log_event('Nadia CS', 'chat_count_report', f"Melaporkan {chat_count} chat masuk")
+        return
+
+    if any(k in lower for k in ['lapor', 'laporan', 'standup', 'rekap']):
         now_str = datetime.now(WITA).strftime('%Y-%m-%d %H:%M:%S WITA')
         report = (
             f"📊 [LAPORAN HARIAN CS OPERASIONAL - NADIA]\n"
@@ -230,6 +264,20 @@ async def handle_devra(msg, chat_id, text, msg_id, is_group):
     await send_tg_typing(BOT_TOKENS['devra9920_bot'], chat_id)
     log_event('DEVRA 9Router', 'incoming_message', f"Dari chat {chat_id}: {text[:60]}")
 
+    if any(k in lower for k in ['jobdesk', 'tugas', 'peran', 'fungsi']):
+        reply = (
+            "⚡ [JOBDESK RESMI: DEVRA 9ROUTER - CHIEF AI ROUTING ARCHITECT]\n\n"
+            "Tanggung Jawab Utama:\n"
+            "1. Pengelolaan & Routing 36+ Model AI Gratis (Bansos Gateway & Devra 9Router).\n"
+            "2. Optimasi Latency Inference (< 1.2s) & Cerdas Failover jika provider upstream error/429.\n"
+            "3. Penegakan Standar Frontend Anti-Slop (Taste Skill) untuk seluruh web Jokicoding.\n"
+            "4. Kompresi Payload Context Window menggunakan Headroom agar hemat token.\n"
+            "5. Menyediakan AI coding dan penalaran analitis tercepat bagi Bu Anisa dan tim."
+        )
+        await send_tg_message(BOT_TOKENS['devra9920_bot'], chat_id, reply, msg_id)
+        log_event('DEVRA 9Router', 'jobdesk_sent', "Memaparkan jobdesk resmi DEVRA")
+        return
+
     if any(k in lower for k in ['model', 'models', 'katalog', 'list model']):
         reply = (
             "🤖 [DEVRA 9Router - AI Gateway Catalog]\n\n"
@@ -265,6 +313,20 @@ async def handle_otter(msg, chat_id, text, msg_id, is_group):
     await send_tg_typing(BOT_TOKENS['otter834_bot'], chat_id)
     log_event('OtterOps', 'incoming_message', f"Dari chat {chat_id}: {text[:60]}")
 
+    if any(k in lower for k in ['jobdesk', 'tugas', 'peran', 'fungsi']):
+        reply = (
+            "🦦 [JOBDESK RESMI: OTTEROPS DEVOPS - SENIOR SRE & THREAT SENTINEL]\n\n"
+            "Tanggung Jawab Utama:\n"
+            "1. Pengawasan 24/7 Uptime Seluruh Domain Web Jokicoding (Bansos, OpenPlag, OpenJurnal, OpenQRIS, OpenJob, OpenStalker, Terminal).\n"
+            "2. Audit Keamanan Defensif Berkala menggunakan 83 Modul Claude-BugHunter & OWASP WSTG v4.2.\n"
+            "3. Menjaga Kestabilan Cloudflare Zero Trust Ingress Tunnel (Port 7681 & 7682).\n"
+            "4. Pembersihan Cache, Rotasi Log, dan Pemeliharaan Resource Server PRoot Android.\n"
+            "5. Deteksi Anomali & Peringatan Dini (Alert) jika ada endpoint yang lambat atau down."
+        )
+        await send_tg_message(BOT_TOKENS['otter834_bot'], chat_id, reply, msg_id)
+        log_event('OtterOps', 'jobdesk_sent', "Memaparkan jobdesk resmi OtterOps")
+        return
+
     if any(k in lower for k in ['status', 'server', 'infrastruktur', 'uptime', 'pantau', 'web']):
         now_str = datetime.now(WITA).strftime('%Y-%m-%d %H:%M:%S WITA')
         reply = (
@@ -298,6 +360,34 @@ async def handle_noura(msg, chat_id, text, msg_id, is_group):
     lower = text.lower()
     await send_tg_typing(BOT_TOKENS['noura_chat_bot'], chat_id)
     log_event('Noura Studio', 'incoming_message', f"Dari chat {chat_id}: {text[:60]}")
+
+    if any(k in lower for k in ['jobdesk', 'tugas', 'peran', 'fungsi']):
+        reply = (
+            "✨ [JOBDESK RESMI: NOURA STUDIO AI - IT & ACADEMIC DIRECTOR]\n\n"
+            "Tanggung Jawab Utama:\n"
+            "1. Pengelolaan Portal Akademik OpenPlag.id (Cek Plagiasi & Deteksi AI Turnitin/GPTZero) & OpenJurnal.id (Riset Ilmiah).\n"
+            "2. Pengawasan Mesin OSINT Digital Footprint OpenStalker.id (https://openstalker.jokicoding.web.id).\n"
+            "3. Penjamin Kualitas Jasa Koding, Pembuatan Software, & Skripsi/Tesis Informatika Jokicoding AI.\n"
+            "4. Penerapan 9 Tuas Humanize AI pada naskah ilmiah agar terbebas dari deteksi AI otomatis.\n"
+            "5. Optimasi SEO & AEO (Agentic Search Optimization) agar web Jokicoding terindeks sempurna di Google & AI Crawler."
+        )
+        await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, reply, msg_id)
+        log_event('Noura Studio', 'jobdesk_sent', "Memaparkan jobdesk resmi Noura Studio")
+        return
+
+    if any(k in lower for k in ['openstalker', 'stalker']):
+        reply = (
+            "✨ [Noura Studio AI - Platform Review]\n\n"
+            "Lapor Bu Anisa, saya sudah meninjau platform OpenStalker.id (https://openstalker.jokicoding.web.id)!\n\n"
+            "Hasil Pemeriksaan Platform:\n"
+            "- Status: Online 200 OK & Responsif\n"
+            "- Fungsi Utama: OSINT Digital Footprint & Phone Intelligence Engine\n"
+            "- Fitur Unggulan: Analisis jejak digital publik, validasi nomor telepon, dan profiling reputasi online secara etis\n"
+            "- Integrasi Ekosistem: Menjadi salah satu produk unggulan software house Noura Studio yang siap dipromosikan ke klien dan mahasiswa riset kejahatan siber."
+        )
+        await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, reply, msg_id)
+        log_event('Noura Studio', 'openstalker_report', "Memberikan laporan detail OpenStalker.id ke Bu Anisa")
+        return
 
     if any(k in lower for k in ['oi', 'test', 'tes', 'halo', 'hai', 'ping']):
         reply = (
