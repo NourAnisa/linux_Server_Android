@@ -9,3 +9,4 @@ Thumbs.db
 *.db-shm
 *.db-wal
 *.b64
+agent-events.json

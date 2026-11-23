@@ -79,10 +79,18 @@ if [ -d "/srv/nouride" ] && ! pgrep -f "nouride" >/dev/null 2>&1; then
     nohup /srv/nouride/nouride start > /var/log/server/nouride.log 2>&1 &
 fi
 
+# 12. Jalankan Bot Team 24/7 Orchestrator (Nadia CS, DEVRA, OtterOps, Noura Studio)
+if ! pgrep -f "bot_team_daemon.py" >/dev/null 2>&1; then
+    echo "▶️ Menjalankan Bot Team 24/7 Orchestrator..."
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    nohup python3 "$SCRIPT_DIR/bot_team_daemon.py" > /var/log/server/bot_team.log 2>&1 &
+fi
+
 sleep 2
 echo "=========================================================="
 echo "✅ Seluruh Layanan Berhasil Dijalankan:"
 echo "   - TinyCore Desktop : http://127.0.0.1:7681 -> https://terminal.jokicoding.web.id"
+echo "   - Bot Team 24/7    : Nadia CS, DEVRA, OtterOps, Noura Studio Online"
 echo "   - OpenQRIS Gateway : http://127.0.0.1:5060 -> https://openqris.jokicoding.web.id"
 echo "   - Bansos Gateway   : http://127.0.0.1:17070 -> https://bansos.jokicoding.web.id (v0.6.3)"
 echo "   - OpenCode CLI     : Siap dijalankan di terminal (ketik: opencode)"

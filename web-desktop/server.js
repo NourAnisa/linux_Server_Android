@@ -161,13 +161,22 @@ const server = http.createServer((req, res) => {
     
     // 5. Bot Team Monitoring API (Karyawan AI 24/7)
     if (pathname === '/api/agent/bot-team') {
-        const eventsPath = '/var/www/bansos-router/agent-events.json';
+        const candidatePaths = [
+            '/var/www/bansos-router/agent-events.json',
+            path.join(__dirname, 'agent-events.json'),
+            path.join(__dirname, '..', 'agent-events.json'),
+            path.join(__dirname, '..', '..', 'agent-events.json'),
+            path.join(process.cwd(), 'agent-events.json')
+        ];
         let recentEvents = [];
-        try {
-            if (fs.existsSync(eventsPath)) {
-                recentEvents = JSON.parse(fs.readFileSync(eventsPath, 'utf8') || '[]');
-            }
-        } catch (_) {}
+        for (const p of candidatePaths) {
+            try {
+                if (fs.existsSync(p)) {
+                    recentEvents = JSON.parse(fs.readFileSync(p, 'utf8') || '[]');
+                    if (recentEvents && recentEvents.length) break;
+                }
+            } catch (_) {}
+        }
 
         if (!recentEvents.length) {
             recentEvents = [
