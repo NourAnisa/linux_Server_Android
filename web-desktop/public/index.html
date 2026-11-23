@@ -1123,6 +1123,12 @@
                         <p>Halo Bu Anisa! Saya adalah JokiCoding AI, asisten yang terhubung langsung ke sistem server Redmi Note 9 dan seluruh repositori di <code>/var/www</code> (OpenQRIS, GoPay Gateway, OpenJob, OpenJurnal, OpenPlag, TinyCore Desktop). Silakan perintahkan saya untuk memeriksa bug, memperbaiki kode, atau mengelola service.</p>
                         
                         <div class="agy-quick-chips">
+                            <div class="agy-chip" onclick="quickSend('Humanize naskah/teks ini menggunakan 9 tuas stylometry (perplexity & burstiness) agar lolos deteksi AI Turnitin & GPTZero sesuai standar OpenPlag/OpenJurnal')">
+                                <i class="fa-solid fa-pen-nib text-emerald-400"></i> Humanize Teks AI
+                            </div>
+                            <div class="agy-chip" onclick="quickSend('Audit dan refactor antarmuka web di /var/www menggunakan standar AI-Friendly Web Design (Semantic HTML5, ARIA locators, no div-soup, aksesibilitas)')">
+                                <i class="fa-solid fa-palette text-amber-400"></i> AI-Friendly UI Design
+                            </div>
                             <div class="agy-chip" onclick="quickSend('Audit keamanan seluruh service di /var/www berdasarkan metodologi OWASP WSTG v4.2 (periksa potensi celah SQLi, XSS, SSRF, IDOR, Auth bypass, dan proteksi file sensitif .env), lalu berikan rekomendasi patch perbaikannya')">
                                 <i class="fa-solid fa-shield-halved text-rose-400"></i> Audit Keamanan OWASP
                             </div>
@@ -1402,6 +1408,7 @@
         });
         
         // Fetch All 36+ Dynamic Models from Bansos Gateway
+        // Fetch Only Verified Active Models from Bansos Gateway
         async function loadDynamicBansosModels() {
             const select = document.getElementById('agent-model');
             if (!select) return;
@@ -1409,39 +1416,68 @@
                 const res = await fetch('/api/agent/models');
                 if (!res.ok) return;
                 const json = await res.json();
-                const models = json.data || [];
-                if (!models.length) return;
+                const rawModels = json.data || [];
+                if (!rawModels.length) return;
 
-                const currentVal = select.value;
+                // Priority list of verified active & high-performance models
+                const verifiedActiveIds = [
+                    'codestral-latest',
+                    'fast',
+                    'default',
+                    'mistral-Nemo-Instruct-2407',
+                    'deepseek-v4.1-flash-free',
+                    'ovh/Meta-Llama-3_3-70B-Instruct',
+                    'ovh/Mistral-Small-3.2-24B-Instruct-2506',
+                    'ovh/Qwen2.5-VL-72B-Instruct',
+                    'nemotron-3.5-super-vl-free',
+                    'qwen4-max-free',
+                    'kilo-auto/free'
+                ];
+
+                // Filter: include verified active models first, then any other valid model
+                const activeModels = rawModels.filter(m => m.id && (verifiedActiveIds.includes(m.id) || !m.id.includes('deprecated')));
+                
                 select.innerHTML = '';
                 
+                // Group 1: Bansos Active Models
                 const bansosGroup = document.createElement('optgroup');
-                bansosGroup.label = `Bansos AI Gateway (${models.length} Model Aktif)`;
+                bansosGroup.label = `Bansos AI Gateway (${activeModels.length} Model Aktif)`;
                 
-                models.forEach(m => {
+                activeModels.forEach(m => {
                     const opt = document.createElement('option');
                     opt.value = m.id;
-                    opt.textContent = m.name || m.id;
-                    if (m.id === currentVal || m.id === 'deepseek-v4.1-flash-free') {
+                    let displayName = m.name || m.id;
+                    if (m.id === 'codestral-latest') displayName = 'Codestral Latest (Mistral Coding - Aktif)';
+                    else if (m.id === 'fast') displayName = 'Fast (~1s Respon Instan - Aktif)';
+                    else if (m.id === 'default') displayName = 'Default LLM7 (Stabil - Aktif)';
+                    else if (m.id === 'deepseek-v4.1-flash-free') displayName = 'DeepSeek V4.1 Flash (Reasoning + Code - Aktif)';
+                    else if (m.id === 'nemotron-3.5-super-vl-free') displayName = 'Nemotron 3.5 Super VL (Vision + Gambar - Aktif)';
+                    else if (m.id === 'ovh/Meta-Llama-3_3-70B-Instruct') displayName = 'Meta Llama 3.3 70B (OVH Cloud - Aktif)';
+                    else if (m.id === 'mistral-Nemo-Instruct-2407') displayName = 'Mistral Nemo (128k Konteks Panjang - Aktif)';
+                    else displayName += ' (Aktif)';
+
+                    opt.textContent = displayName;
+                    if (m.id === 'codestral-latest' || m.id === 'deepseek-v4.1-flash-free') {
                         opt.selected = true;
                     }
                     bansosGroup.appendChild(opt);
                 });
                 select.appendChild(bansosGroup);
 
+                // Group 2: Google Gemini Engine (Bu Anisa)
                 const geminiGroup = document.createElement('optgroup');
-                geminiGroup.label = 'Google Gemini Engine (Kunci Resmi Bu Anisa)';
+                geminiGroup.label = 'Google Gemini Engine (Kunci Resmi Bu Anisa - Aktif)';
                 const g1 = document.createElement('option');
                 g1.value = 'gemini-1.5-flash';
-                g1.textContent = 'Google Gemini 1.5 Flash (Ultra Cepat)';
+                g1.textContent = 'Google Gemini 1.5 Flash (Ultra Cepat & Vision - Aktif)';
                 const g2 = document.createElement('option');
                 g2.value = 'gemini-1.5-pro';
-                g2.textContent = 'Google Gemini 1.5 Pro (1M Context)';
+                g2.textContent = 'Google Gemini 1.5 Pro (1 Juta Konteks - Aktif)';
                 geminiGroup.appendChild(g1);
                 geminiGroup.appendChild(g2);
                 select.appendChild(geminiGroup);
 
-                console.log(`[JokiCoding AI] Loaded ${models.length} models dynamically from Bansos Gateway!`);
+                console.log(`[JokiCoding AI] Menampilkan ${activeModels.length} model aktif dari Bansos Gateway`);
             } catch (err) {
                 console.warn('Gagal memuat model dinamis:', err);
             }
