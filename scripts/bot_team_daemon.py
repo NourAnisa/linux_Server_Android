@@ -146,7 +146,13 @@ async def call_ai(system_prompt: str, user_prompt: str, model: str = 'fast') -> 
     }
 
     loop = asyncio.get_running_loop()
-    for attempt_model in [model, 'nemotron-3.5-lightning-free', 'deepseek-v4.1-flash-free']:
+    candidate_models = [model, 'deepseek-v4.1-flash-free', 'codestral-latest', 'flint-40b-free', 'mimo-v2.6-flash-free', 'big-pickle', 'default']
+    seen_models = []
+    for m in candidate_models:
+        if m and m not in seen_models:
+            seen_models.append(m)
+
+    for attempt_model in seen_models:
         try:
             req_body = json.dumps({
                 'model': attempt_model,
@@ -164,10 +170,11 @@ async def call_ai(system_prompt: str, user_prompt: str, model: str = 'fast') -> 
 
             res = await loop.run_in_executor(None, do_call)
             text = res['choices'][0]['message']['content']
-            return clean_no_asterisk(text)
+            if text:
+                return clean_no_asterisk(text)
         except Exception as e:
             print(f"[AI Fallback] Model {attempt_model} error: {e}")
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.3)
 
     return "Sistem AI sedang melakukan sinkronisasi model. Permintaan dicatat dan segera diproses."
 
