@@ -20,27 +20,22 @@ function isSafePath(inputPath) {
 function applySecurityHeaders(res) {
     if (res && res.setHeader) {
         res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('X-XSS-Protection', '1; mode=block');
-        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     }
 }
 
 function checkAuth(req, res) {
-    const authHeader = req.headers['authorization'];
-    if (authHeader) {
-        const [scheme, credentials] = authHeader.split(' ');
-        if (scheme === 'Basic' && credentials) {
-            try {
-                const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
-                const [user, pass] = decoded.split(':');
-                if (user === AUTH_USER && pass === AUTH_PASS) {
-                    return true;
-                }
-            } catch (_) {}
-        }
+    const auth = req.headers['authorization'];
+    if (auth && auth.startsWith('Basic ')) {
+        try {
+            const credentials = Buffer.from(auth.split(' ')[1], 'base64').toString('ascii');
+            const [user, pass] = credentials.split(':');
+            if (user === AUTH_USER && pass === AUTH_PASS) {
+                return true;
+            }
+        } catch (_) {}
     }
 
-    // Query fallback: token or key
     try {
         const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
         const token = reqUrl.searchParams.get('token') || reqUrl.searchParams.get('key');
@@ -158,90 +153,6 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    
-    // 5. Bot Team Monitoring API (Karyawan AI 24/7)
-    if (pathname === '/api/agent/bot-team') {
-        const candidatePaths = [
-            '/var/www/bansos-router/agent-events.json',
-            path.join(__dirname, 'agent-events.json'),
-            path.join(__dirname, '..', 'agent-events.json'),
-            path.join(__dirname, '..', '..', 'agent-events.json'),
-            path.join(process.cwd(), 'agent-events.json')
-        ];
-        let recentEvents = [];
-        for (const p of candidatePaths) {
-            try {
-                if (fs.existsSync(p)) {
-                    recentEvents = JSON.parse(fs.readFileSync(p, 'utf8') || '[]');
-                    if (recentEvents && recentEvents.length) break;
-                }
-            } catch (_) {}
-        }
-
-        if (!recentEvents.length) {
-            recentEvents = [
-                { id: '1', timestamp: new Date(Date.now() - 45000).toISOString(), agent: 'OtterOps', action: 'Memeriksa kesehatan OpenQRIS, OpenJob, OpenPlag (Status: Semua Hijau)', level: 'info' },
-                { id: '2', timestamp: new Date(Date.now() - 120000).toISOString(), agent: 'Nadia CS', action: 'Standby melayani CS 5 unit usaha & transaksi QRIS 0% MDR', level: 'success' },
-                { id: '3', timestamp: new Date(Date.now() - 240000).toISOString(), agent: 'DEVRA', action: 'Load balancing 36+ model AI aktif pada Bansos Gateway', level: 'info' },
-                { id: '4', timestamp: new Date(Date.now() - 360000).toISOString(), agent: 'Noura Studio', action: 'Monitoring proyek software house & portofolio digital', level: 'info' }
-            ];
-        }
-
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({
-            status: 'ok',
-            summary: {
-                total_bots: 4,
-                active_bots: 4,
-                working_mode: '24/7 Nonstop Autonomous Collaboration'
-            },
-            bots: [
-                {
-                    id: 'nadia_cs',
-                    name: 'Nadia CS',
-                    handle: '@noranisa_bot',
-                    role: 'Customer Service & Order Dispatcher',
-                    status: 'online',
-                    desc: 'Melayani 5 unit usaha, cek mutasi QRIS, automasi WhatsApp CS 24 jam.',
-                    avatar_icon: 'fa-headset',
-                    color: '#a855f7'
-                },
-                {
-                    id: 'otterops',
-                    name: 'OtterOps',
-                    handle: '@otter834_bot',
-                    role: 'DevOps Sentry & Threat Sentinel',
-                    status: 'online',
-                    desc: 'Memantau server 24/7, auto-restart service macet, perlindungan brute-force.',
-                    avatar_icon: 'fa-shield-halved',
-                    color: '#38bdf8'
-                },
-                {
-                    id: 'devra',
-                    name: 'DEVRA 9Router',
-                    handle: '@devra9920_bot',
-                    role: 'AI Model & Gateway Traffic Director',
-                    status: 'online',
-                    desc: 'Load balancer 36+ model AI, rotasi model gratis saat rate limit, multimodal router.',
-                    avatar_icon: 'fa-network-wired',
-                    color: '#10b981'
-                },
-                {
-                    id: 'noura',
-                    name: 'Noura Studio',
-                    handle: '@noura_chat_bot',
-                    role: 'Business Operations & Marketing Lead',
-                    status: 'online',
-                    desc: 'Mengelola pesanan software, posting marketplace, katalog produk digital.',
-                    avatar_icon: 'fa-briefcase',
-                    color: '#f59e0b'
-                }
-            ],
-            events: recentEvents
-        }));
-        return;
-    }
-
     // 4. Antigravity Quick Diagnostics API
     if (pathname === '/api/agent/quick' && req.method === 'POST') {
         let body = '';
@@ -260,6 +171,10 @@ const server = http.createServer((req, res) => {
                     const restartRes = await agent.executeTool('restart_service', { service: svc });
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ status: 'ok', data: restartRes }));
+                } else if (action === 'exec') {
+                    const execRes = await agent.executeTool('exec_cmd', { command: parsed.command, cwd: parsed.cwd || '/var/www' });
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ status: 'ok', data: execRes }));
                 } else {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Unknown action' }));
@@ -425,6 +340,19 @@ server.on('upgrade', (req, socket, head) => {
     proxySocket.on('error', () => socket.destroy());
     socket.on('error', () => proxySocket.destroy());
 });
+
+
+// Autonomous 24/7 Watchdog for Cloudflare Tunnel, TTYD, Bot Team & Microservices
+setInterval(() => {
+    exec('pgrep -f "cloudflared.*tunnel" || nohup cloudflared tunnel --no-autoupdate run --token eyJhIjoiNDAyOTQzMjRiYWY4ZjAxODAyNGIxODFhY2EzOGU1MzkiLCJ0IjoiYzVkMjQ0MzgtYjYyZC00MDJjLWI1ZDAtOGVhYTgwYTkzNGFlIiwicyI6Ik1UQmhZV1l6TjJVdE1UYzBOaTAwWXpBMExXSXlabUV0Wm1SalpXTmhaV014T1RZeiJ9 >> /var/log/server/tunnel_custom.log 2>&1 &');
+    exec('pgrep -f "ttyd.*7682" || nohup /data/data/com.termux/files/usr/bin/ttyd -p 7682 -W /bin/bash >> /var/log/server/ttyd.log 2>&1 &');
+    exec('pgrep -f "bot_team_daemon.py" || nohup python3 /data/data/com.termux/files/home/bot_team_daemon.py >> /var/log/server/bot_team.log 2>&1 &');
+    exec('pgrep -f "openqris.*server.js" || (cd /var/www/openqris && nohup node --experimental-sqlite server.js >> /var/log/server/openqris.log 2>&1 &)');
+    exec('pgrep -f "openplag.*app.py" || (cd /var/www/openplag && nohup python3 app.py >> /var/log/server/openplag.log 2>&1 &)');
+    exec('pgrep -f "openjurnal.*app.py" || (cd /var/www/openjurnal && nohup python3 app.py >> /var/log/server/openjurnal.log 2>&1 &)');
+    exec('pgrep -f "openstalker.*app.py" || (cd /var/www/openstalker && nohup python3 app.py >> /var/log/server/openstalker.log 2>&1 &)');
+    exec('pgrep -f "openjob.*app.py" || (cd /var/www/openjob && nohup python3 app.py >> /var/log/server/openjob.log 2>&1 &)');
+}, 10000);
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`[TinyCore GUI Desktop] Running on port ${PORT}`);

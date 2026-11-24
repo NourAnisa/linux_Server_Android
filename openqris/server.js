@@ -583,3 +583,11 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🌐 Public URL: ${BASE_URL}`);
     console.log(`====================================================`);
 });
+
+process.on('uncaughtException', (err) => {
+    console.error('[OpenQRIS UncaughtException]', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[OpenQRIS UnhandledRejection]', reason);
+});
