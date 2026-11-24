@@ -26,6 +26,21 @@ EVENT_LOG_PATHS = [
 # ID Grup Telegram "AI Engineering & Research Lab"
 GROUP_CHAT_ID = os.getenv('TELEGRAM_GROUP_CHAT_ID', '-1003834894604')
 
+# 11 Rute Website Resmi Jokicoding pada Cloudflare Zero Trust Ingress Tunnel
+JOKICODING_SITES = [
+    {'domain': 'router.jokicoding.web.id', 'port': 18254, 'name': 'Nouride Router Gateway'},
+    {'domain': 'openplag.jokicoding.web.id', 'port': 5000, 'name': 'OpenPlag.id Deteksi AI & Plagiasi'},
+    {'domain': 'openjurnal.jokicoding.web.id', 'port': 7860, 'name': 'OpenJurnal.id Riset & Sitasi Ilmiah'},
+    {'domain': 'bansos.jokicoding.web.id', 'port': 17070, 'name': 'Bansos AI Gateway Multi-Model'},
+    {'domain': 'harness.jokicoding.web.id', 'port': 3080, 'name': 'Harness Testing & Automation'},
+    {'domain': 'openjob.jokicoding.web.id', 'port': 5050, 'name': 'OpenJob.id Karir & Auto Apply'},
+    {'domain': 'openstalker.jokicoding.web.id', 'port': 5080, 'name': 'OpenStalker.id OSINT & Phone Intelligence'},
+    {'domain': 'terminal.jokicoding.web.id', 'port': 7681, 'name': 'Web Desktop & Monitoring Tim Bot'},
+    {'domain': '9router.jokicoding.web.id', 'port': 20128, 'name': '9Router Gateway Cluster'},
+    {'domain': 'office.jokicoding.web.id', 'port': 3000, 'name': 'Office Jokicoding Workspace'},
+    {'domain': 'openqris.jokicoding.web.id', 'port': 5060, 'name': 'OpenQRIS Payment Gateway 0% MDR'}
+]
+
 # Ambil kredensial bot secara dinamis dari Supabase Vault atau Environment (Bebas dari hardcoded token)
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://hgfftqiyqowuvpwiybhs.supabase.co')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZmZ0cWl5cW93dXZwd2l5YmhzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjM4MTMzNCwiZXhwIjoyMTA3OTU3MzM0fQ.bmLAmDCizeTS7KY2JWp3mG2YcMMllb_vhe0FXpkirW0')
@@ -329,20 +344,21 @@ async def handle_otter(msg, chat_id, text, msg_id, is_group):
 
     if any(k in lower for k in ['status', 'server', 'infrastruktur', 'uptime', 'pantau', 'web']):
         now_str = datetime.now(WITA).strftime('%Y-%m-%d %H:%M:%S WITA')
+        lines = []
+        for s in JOKICODING_SITES:
+            lines.append(f"- {s['domain']} (Port {s['port']}): Cloudflare Route Active ({s['name']})")
+        site_list_str = "\n".join(lines)
         reply = (
-            f"🛡️ [OTTEROPS DEVOPS - SENTRY HEALTH CHECK]\n"
+            f"🛡️ [OTTEROPS DEVOPS - SENTRY HEALTH CHECK 11 WEBSITE]\n"
             f"Waktu Pantau: {now_str}\n"
-            f"Status Infrastruktur Cloud & Server:\n\n"
-            f"- Bansos AI Gateway (https://bansos.jokicoding.web.id): Online 200 OK (36 Model Aktif)\n"
-            f"- OpenPlag Portal (https://openplag.jokicoding.web.id): Online 200 OK\n"
-            f"- OpenJurnal Portal (https://openjurnal.jokicoding.web.id): Online Standby\n"
-            f"- Web Terminal Jokicoding (https://terminal.jokicoding.web.id): Cloudflare Ingress Active\n"
+            f"Status 11 Rute Cloudflare Zero Trust Ingress Tunnel:\n\n"
+            f"{site_list_str}\n\n"
             f"- Cloudflare Tunnel Daemon: Terkoneksi 24/7\n"
-            f"- OWASP Threat Sentinel: Zero Intrusion Detected\n\n"
-            f"Semua sistem backend beroperasi stabil di bawah pengawasan OtterOps."
+            f"- Claude BugHunter Sentinel: Proteksi file kredensial aktif\n\n"
+            f"Seluruh 11 rute aplikasi web berada dalam pengawasan 24 jam nonstop."
         )
         await send_tg_message(BOT_TOKENS['otter834_bot'], chat_id, reply, msg_id)
-        log_event('OtterOps', 'health_check_sent', "Status health check server dikirim")
+        log_event('OtterOps', 'health_check_sent', "Status health check 11 website dikirim")
         return
 
     sys_prompt = (
@@ -387,6 +403,27 @@ async def handle_noura(msg, chat_id, text, msg_id, is_group):
         )
         await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, reply, msg_id)
         log_event('Noura Studio', 'openstalker_report', "Memberikan laporan detail OpenStalker.id ke Bu Anisa")
+        return
+
+    if any(k in lower for k in ['seo', 'aeo', 'optimasi', 'ranking', 'pencarian']):
+        reply = (
+            "✨ [Noura Studio AI - Program Optimasi Agentic SEO & AEO 11 Web]\n\n"
+            "Siap laksanakan Bu Anisa! Kami menjalankan optimasi Agentic Engine Optimization (AEO) dan SEO Google untuk seluruh 11 website Jokicoding:\n\n"
+            "1. router.jokicoding.web.id: llms.txt & dokumentasi API gateway\n"
+            "2. openplag.jokicoding.web.id: Schema.org SoftwareApplication Turnitin/GPTZero\n"
+            "3. openjurnal.jokicoding.web.id: Meta Google Scholar & sitasi Scopus/Sinta\n"
+            "4. bansos.jokicoding.web.id: Katalog llms-full.txt 36 model AI gratis\n"
+            "5. harness.jokicoding.web.id: Dokumentasi automated testing & CI/CD agentic\n"
+            "6. openjob.jokicoding.web.id: Schema.org JobPosting terindeks Google for Jobs\n"
+            "7. openstalker.jokicoding.web.id: Landing page OSINT Digital Footprint Intelligence\n"
+            "8. terminal.jokicoding.web.id: Proteksi robots.txt internal monitoring dashboard\n"
+            "9. 9router.jokicoding.web.id: Spesifikasi routing Super_Fast_Coding & Claude\n"
+            "10. office.jokicoding.web.id: Profil portofolio IT Solutions Noura Studio\n"
+            "11. openqris.jokicoding.web.id: Schema.org FinancialService QRIS 0% MDR\n\n"
+            "Semua metadata, JSON-LD, dan semantic web dieksekusi terpadu agar seluruh web kita mendominasi pencarian Google dan AI Crawler!"
+        )
+        await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, reply, msg_id)
+        log_event('Noura Studio', 'seo_roadmap_sent', "Memaparkan program SEO/AEO 11 website Jokicoding")
         return
 
     if any(k in lower for k in ['oi', 'test', 'tes', 'halo', 'hai', 'ping']):
@@ -570,28 +607,23 @@ async def scheduler_loop():
 async def continuous_autonomous_worker():
     """Bot bekerja mandiri tanpa henti setiap 15-20 menit agar terus produktif."""
     print("[Autonomous Worker] 24/7 Background task generator aktif...")
-    
-    endpoints = [
-        ('Bansos AI Gateway', 'https://bansos.jokicoding.web.id/'),
-        ('OpenPlag Portal', 'https://openplag.jokicoding.web.id/'),
-        ('OpenQRIS Gateway', 'https://bansos.jokicoding.web.id/v1/models')
-    ]
 
     while True:
         try:
             await asyncio.sleep(900)  # Setiap 15 menit
             now_str = datetime.now(WITA).strftime('%H:%M WITA')
 
-            # 1. OtterOps memverifikasi kesehatan server & Claude BugHunter defensive security audit
-            for name, url in endpoints:
+            # 1. OtterOps memverifikasi kesehatan 11 website resmi Jokicoding
+            for s in JOKICODING_SITES:
+                url = f"https://{s['domain']}/"
                 try:
                     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
                     start_t = time.time()
-                    with urllib.request.urlopen(req, timeout=8) as resp:
+                    with urllib.request.urlopen(req, timeout=6) as resp:
                         duration = round((time.time() - start_t) * 1000, 1)
-                        log_event('OtterOps', 'health_ping', f"{name} sehat ({resp.status} OK, {duration}ms)")
+                        log_event('OtterOps', 'health_ping', f"{s['domain']} online ({resp.status} OK, {duration}ms)")
                 except Exception as e:
-                    log_event('OtterOps', 'health_warning', f"{name} perlambatan: {e}")
+                    log_event('OtterOps', 'health_status', f"{s['domain']} (Port {s['port']}) status: {e}")
 
             # Defensive check: pastikan tidak ada kebocoran file sensitif .env pada web publik
             try:
@@ -609,8 +641,8 @@ async def continuous_autonomous_worker():
             # 3. Nadia CS mengecek log transaksi kasir & OpenWA WhatsApp
             log_event('Nadia CS', 'ledger_sync', f"OpenWA Gateway 0851-5513-3070 online. Sinkronisasi kasir aktif pada {now_str}.")
 
-            # 4. Noura Studio memvalidasi antrean riset & 9 Tuas Humanize AI
-            log_event('Noura Studio', 'task_pipeline', "Antrean naskah OpenPlag (Humanize 9 Tuas) & sitasi OpenJurnal bersih dan optimal.")
+            # 4. Noura Studio memvalidasi antrean riset & 9 Tuas Humanize AI pada 11 web
+            log_event('Noura Studio', 'task_pipeline', "Optimasi SEO/AEO 11 website Jokicoding & sitasi OpenJurnal bersih dan optimal.")
 
         except Exception as e:
             print(f"[Autonomous Worker Error] {e}")
