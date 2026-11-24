@@ -152,6 +152,51 @@ async def send_tg_typing(token: str, chat_id):
     except Exception:
         pass
 
+async def send_tg_placeholder(token: str, chat_id, text: str, reply_to_id=None):
+    clean = clean_no_asterisk(text)
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        'chat_id': chat_id,
+        'text': clean
+    }
+    if reply_to_id:
+        payload['reply_to_message_id'] = reply_to_id
+
+    data = urllib.parse.urlencode(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers={'User-Agent': 'Mozilla/5.0'})
+    loop = asyncio.get_running_loop()
+    try:
+        def do_req():
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                return json.loads(resp.read().decode())
+        res = await loop.run_in_executor(None, do_req)
+        if res.get('ok'):
+            return res['result']['message_id']
+    except Exception as e:
+        print(f"[TG Placeholder Error]: {e}")
+    return None
+
+async def edit_tg_message(token: str, chat_id, message_id, text: str):
+    clean = clean_no_asterisk(text)
+    url = f"https://api.telegram.org/bot{token}/editMessageText"
+    payload = {
+        'chat_id': chat_id,
+        'message_id': message_id,
+        'text': clean
+    }
+    data = urllib.parse.urlencode(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers={'User-Agent': 'Mozilla/5.0'})
+    loop = asyncio.get_running_loop()
+    try:
+        def do_req():
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return json.loads(resp.read().decode())
+        res = await loop.run_in_executor(None, do_req)
+        return res.get('ok', False)
+    except Exception as e:
+        print(f"[TG Edit Error]: {e}")
+        return False
+
 async def call_ai(system_prompt: str, user_prompt: str, model: str = 'fast') -> str:
     url = f"{AI_BASE_URL}/chat/completions"
     headers = {
@@ -259,6 +304,7 @@ async def handle_nadia(msg, chat_id, text, msg_id, is_group):
         log_event('Nadia CS', 'report_sent', "Laporan operasional kasir dikirim ke Telegram")
         return
 
+    loading_id = await send_tg_placeholder(BOT_TOKENS['noranisa_bot'], chat_id, "⏳ [Nadia CS]: Menerima instruksi... Sedang memeriksa data kasir & operasional...", msg_id)
     sys_prompt = (
         "Kamu adalah Nadia, Lead Customer Operations dan Chief Cashier untuk 5 unit bisnis Bu Nor Anisa:\n"
         "1. Refill Gas Portable se-Kalimantan (Banjarmasin, Palangkaraya, Balikpapan) harga Rp 12.000/botol.\n"
@@ -270,7 +316,10 @@ async def handle_nadia(msg, chat_id, text, msg_id, is_group):
     )
     reply_ai = await call_ai(sys_prompt, text)
     full_reply = f"👩‍💼 [Nadia CS - Operasional]\n\n{reply_ai}"
-    await send_tg_message(BOT_TOKENS['noranisa_bot'], chat_id, full_reply, msg_id)
+    if loading_id:
+        await edit_tg_message(BOT_TOKENS['noranisa_bot'], chat_id, loading_id, full_reply)
+    else:
+        await send_tg_message(BOT_TOKENS['noranisa_bot'], chat_id, full_reply, msg_id)
     log_event('Nadia CS', 'reply_sent', reply_ai[:80])
 
 # 2. DEVRA 9ROUTER (@devra9920_bot)
@@ -312,6 +361,7 @@ async def handle_devra(msg, chat_id, text, msg_id, is_group):
         log_event('DEVRA 9Router', 'models_sent', "Daftar katalog model dikirim")
         return
 
+    loading_id = await send_tg_placeholder(BOT_TOKENS['devra9920_bot'], chat_id, "⚡ [DEVRA 9Router]: Menerima instruksi... Menghubungkan ke kluster model AI...", msg_id)
     sys_prompt = (
         "Kamu adalah DEVRA, Chief AI Routing Architect untuk 9Router dan Bansos Gateway Jokicoding.\n"
         "Tugasmu: Mengelola ketersediaan 36+ model AI, memastikan failover cerdas tanpa timeout, mengoptimalkan context window, dan menyediakan solusi AI coding tercepat.\n"
@@ -319,7 +369,10 @@ async def handle_devra(msg, chat_id, text, msg_id, is_group):
     )
     reply_ai = await call_ai(sys_prompt, text, model='deepseek-v4.1-flash-free')
     full_reply = f"⚡ [DEVRA 9Router - AI Gateway]\n\n{reply_ai}"
-    await send_tg_message(BOT_TOKENS['devra9920_bot'], chat_id, full_reply, msg_id)
+    if loading_id:
+        await edit_tg_message(BOT_TOKENS['devra9920_bot'], chat_id, loading_id, full_reply)
+    else:
+        await send_tg_message(BOT_TOKENS['devra9920_bot'], chat_id, full_reply, msg_id)
     log_event('DEVRA 9Router', 'reply_sent', reply_ai[:80])
 
 # 3. OTTEROPS DEVOPS (@otter834_bot)
@@ -361,6 +414,7 @@ async def handle_otter(msg, chat_id, text, msg_id, is_group):
         log_event('OtterOps', 'health_check_sent', "Status health check 11 website dikirim")
         return
 
+    loading_id = await send_tg_placeholder(BOT_TOKENS['otter834_bot'], chat_id, "🦦 [OtterOps]: Menerima instruksi... Memeriksa metrik infrastruktur & server Jokicoding...", msg_id)
     sys_prompt = (
         "Kamu adalah OtterOps, Senior Site Reliability Engineer (SRE) dan Threat Security Sentinel untuk infrastruktur server Jokicoding dan Linux PRoot.\n"
         "Tugasmu: Menjaga server tetap hidup 24 jam nonstop, mengawasi tunnel Cloudflare, auto-restart service yang down, dan audit keamanan OWASP.\n"
@@ -368,7 +422,10 @@ async def handle_otter(msg, chat_id, text, msg_id, is_group):
     )
     reply_ai = await call_ai(sys_prompt, text, model='codestral-latest')
     full_reply = f"🦦 [OtterOps - SRE & DevOps]\n\n{reply_ai}"
-    await send_tg_message(BOT_TOKENS['otter834_bot'], chat_id, full_reply, msg_id)
+    if loading_id:
+        await edit_tg_message(BOT_TOKENS['otter834_bot'], chat_id, loading_id, full_reply)
+    else:
+        await send_tg_message(BOT_TOKENS['otter834_bot'], chat_id, full_reply, msg_id)
     log_event('OtterOps', 'reply_sent', reply_ai[:80])
 
 # 4. NOURA STUDIO AI (@noura_chat_bot)
@@ -441,14 +498,18 @@ async def handle_noura(msg, chat_id, text, msg_id, is_group):
         log_event('Noura Studio', 'greeting_sent', "Respon salam/test aktif dikirim")
         return
 
+    loading_id = await send_tg_placeholder(BOT_TOKENS['noura_chat_bot'], chat_id, "✨ [Noura Studio]: Menerima instruksi Bu Anisa... Sedang menganalisis dan memproses tugas...", msg_id)
     sys_prompt = (
         "Kamu adalah Noura, Project Director di Noura Studio (Software, IT Solutions, dan Riset Akademik).\n"
-        "Tugasmu: Mengoordinasikan proyek IT Jokicoding, mengelola verifikasi karya ilmiah di OpenPlag.id dan sintesis jurnal di OpenJurnal.id, serta memastikan klien mendapatkan solusi rekayasa perangkat lunak kualitas terbaik.\n"
+        "Tugasmu: Mengoordinasikan 11 website resmi Jokicoding, mengelola verifikasi karya ilmiah di OpenPlag.id, sintesis jurnal di OpenJurnal.id, dan OSINT di OpenStalker.id, serta memastikan klien mendapatkan solusi rekayasa perangkat lunak kualitas terbaik.\n"
         "Gaya bicara: Elegan, solutif, cerdas, berwibawa, memanggil Bu Anisa dengan penuh hormat. JANGAN gunakan tanda bintang (*) sama sekali."
     )
     reply_ai = await call_ai(sys_prompt, text)
     full_reply = f"✨ [Noura Studio - IT & Academic Director]\n\n{reply_ai}"
-    await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, full_reply, msg_id)
+    if loading_id:
+        await edit_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, loading_id, full_reply)
+    else:
+        await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, full_reply, msg_id)
     log_event('Noura Studio', 'reply_sent', reply_ai[:80])
 
 # ==============================================================================
