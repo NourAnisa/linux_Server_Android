@@ -27,19 +27,26 @@ EVENT_LOG_PATHS = [
 GROUP_CHAT_ID = os.getenv('TELEGRAM_GROUP_CHAT_ID', '-1003834894604')
 
 # 11 Rute Website Resmi Jokicoding pada Cloudflare Zero Trust Ingress Tunnel
-JOKICODING_SITES = [
-    {'domain': 'router.jokicoding.web.id', 'port': 18254, 'name': 'Nouride Router Gateway'},
+# Kategori A: 5 Website Publik Komersial (Fokus 100% SEO, AEO, Traffic, & Pelanggan)
+PUBLIC_SEO_SITES = [
     {'domain': 'openplag.jokicoding.web.id', 'port': 5000, 'name': 'OpenPlag.id Deteksi AI & Plagiasi'},
     {'domain': 'openjurnal.jokicoding.web.id', 'port': 7860, 'name': 'OpenJurnal.id Riset & Sitasi Ilmiah'},
-    {'domain': 'bansos.jokicoding.web.id', 'port': 17070, 'name': 'Bansos AI Gateway Multi-Model'},
-    {'domain': 'harness.jokicoding.web.id', 'port': 3080, 'name': 'Harness Testing & Automation'},
     {'domain': 'openjob.jokicoding.web.id', 'port': 5050, 'name': 'OpenJob.id Karir & Auto Apply'},
     {'domain': 'openstalker.jokicoding.web.id', 'port': 5080, 'name': 'OpenStalker.id OSINT & Phone Intelligence'},
-    {'domain': 'terminal.jokicoding.web.id', 'port': 7681, 'name': 'Web Desktop & Monitoring Tim Bot'},
-    {'domain': '9router.jokicoding.web.id', 'port': 20128, 'name': '9Router Gateway Cluster'},
-    {'domain': 'office.jokicoding.web.id', 'port': 3000, 'name': 'Office Jokicoding Workspace'},
     {'domain': 'openqris.jokicoding.web.id', 'port': 5060, 'name': 'OpenQRIS Payment Gateway 0% MDR'}
 ]
+
+# Kategori B: 6 Website Infrastruktur Internal (TIDAK PERLU SEO/AEO - NOINDEX & SRE Only)
+INTERNAL_INFRA_SITES = [
+    {'domain': 'router.jokicoding.web.id', 'port': 18254, 'name': 'Nouride Router Gateway'},
+    {'domain': 'bansos.jokicoding.web.id', 'port': 17070, 'name': 'Bansos AI Gateway Multi-Model'},
+    {'domain': 'harness.jokicoding.web.id', 'port': 3080, 'name': 'Harness Testing & Automation'},
+    {'domain': 'terminal.jokicoding.web.id', 'port': 7681, 'name': 'Web Desktop & Monitoring Tim Bot'},
+    {'domain': '9router.jokicoding.web.id', 'port': 20128, 'name': '9Router Gateway Cluster'},
+    {'domain': 'office.jokicoding.web.id', 'port': 3000, 'name': 'Office Jokicoding Workspace'}
+]
+
+JOKICODING_SITES = PUBLIC_SEO_SITES + INTERNAL_INFRA_SITES
 
 # Ambil kredensial bot secara dinamis dari Supabase Vault atau Environment (Bebas dari hardcoded token)
 SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://hgfftqiyqowuvpwiybhs.supabase.co')
@@ -464,23 +471,25 @@ async def handle_noura(msg, chat_id, text, msg_id, is_group):
 
     if any(k in lower for k in ['seo', 'aeo', 'optimasi', 'ranking', 'pencarian']):
         reply = (
-            "✨ [Noura Studio AI - Program Optimasi Agentic SEO & AEO 11 Web]\n\n"
-            "Siap laksanakan Bu Anisa! Kami menjalankan optimasi Agentic Engine Optimization (AEO) dan SEO Google untuk seluruh 11 website Jokicoding:\n\n"
-            "1. router.jokicoding.web.id: llms.txt & dokumentasi API gateway\n"
-            "2. openplag.jokicoding.web.id: Schema.org SoftwareApplication Turnitin/GPTZero\n"
-            "3. openjurnal.jokicoding.web.id: Meta Google Scholar & sitasi Scopus/Sinta\n"
-            "4. bansos.jokicoding.web.id: Katalog llms-full.txt 36 model AI gratis\n"
-            "5. harness.jokicoding.web.id: Dokumentasi automated testing & CI/CD agentic\n"
-            "6. openjob.jokicoding.web.id: Schema.org JobPosting terindeks Google for Jobs\n"
-            "7. openstalker.jokicoding.web.id: Landing page OSINT Digital Footprint Intelligence\n"
-            "8. terminal.jokicoding.web.id: Proteksi robots.txt internal monitoring dashboard\n"
-            "9. 9router.jokicoding.web.id: Spesifikasi routing Super_Fast_Coding & Claude\n"
-            "10. office.jokicoding.web.id: Profil portofolio IT Solutions Noura Studio\n"
-            "11. openqris.jokicoding.web.id: Schema.org FinancialService QRIS 0% MDR\n\n"
-            "Semua metadata, JSON-LD, dan semantic web dieksekusi terpadu agar seluruh web kita mendominasi pencarian Google dan AI Crawler!"
+            "✨ [NOURA STUDIO AI - FOKUS OPTIMASI AGENTIC SEO & AEO]\n\n"
+            "Siap laksanakan Bu Anisa! Sesuai instruksi pimpinan, kami memisahkan strategi web dengan tegas:\n\n"
+            "🌟 5 WEBSITE PUBLIK KOMERSIAL (FOKUS 100% AGENTIC SEO & AEO):\n"
+            "1. openplag.jokicoding.web.id (Port 5000): Schema.org SoftwareApplication deteksi AI Turnitin & GPTZero, semantic llms.txt\n"
+            "2. openjurnal.jokicoding.web.id (Port 7860): Meta tags Google Scholar, sitasi Scopus/SINTA, llms.txt terstruktur untuk AI crawler\n"
+            "3. openjob.jokicoding.web.id (Port 5050): Schema.org JobPosting terindeks instan di Google for Jobs & agen pencari loker\n"
+            "4. openstalker.jokicoding.web.id (Port 5080): Landing page OSINT Digital Footprint & Phone Intelligence dengan OpenGraph viral\n"
+            "5. openqris.jokicoding.web.id (Port 5060): Schema.org FinancialService QRIS Dinamis 0% MDR untuk akuisisi merchant\n\n"
+            "🔒 6 WEBSITE INFRASTRUKTUR INTERNAL (TIDAK PERLU SEO/AEO - NOINDEX & SRE ONLY):\n"
+            "- router.jokicoding.web.id (Port 18254 - Nouride Router)\n"
+            "- bansos.jokicoding.web.id (Port 17070 - Bansos AI Gateway)\n"
+            "- harness.jokicoding.web.id (Port 3080 - Harness Test Suite)\n"
+            "- terminal.jokicoding.web.id (Port 7681 - Web Desktop & Sentry Console)\n"
+            "- office.jokicoding.web.id (Port 3000 - Office Workspace)\n"
+            "- 9router.jokicoding.web.id (Port 20128 - 9Router Gateway Cluster)\n\n"
+            "OtterOps telah mengunci 6 domain internal tersebut dengan robots.txt Disallow: / dan header X-Robots-Tag: noindex agar tidak diindeks crawler publik, sedangkan kami di Noura Studio mencurahkan 100% daya gedor SEO/AEO untuk 5 web produk komersial Bu Anisa!"
         )
         await send_tg_message(BOT_TOKENS['noura_chat_bot'], chat_id, reply, msg_id)
-        log_event('Noura Studio', 'seo_roadmap_sent', "Memaparkan program SEO/AEO 11 website Jokicoding")
+        log_event('Noura Studio', 'seo_roadmap_sent', "Memaparkan program SEO/AEO 5 website publik dan proteksi NOINDEX 6 web internal")
         return
 
     if any(k in lower for k in ['oi', 'test', 'tes', 'halo', 'hai', 'ping']):
@@ -560,9 +569,10 @@ async def run_morning_standup():
         f"🦦 [STANDUP PAGI 08:30 WITA - RENCANA SRE & INFRASTRUKTUR]\n"
         f"Pelapor: OtterOps (Senior Site Reliability Engineer)\n\n"
         f"Target & Rencana Kerja OtterOps Hari Ini:\n"
-        f"- Audit menyeluruh respon HTTP domain: bansos, terminal, openplag, openjurnal\n"
+        f"- Audit menyeluruh uptime 11 rute Cloudflare Zero Trust Tunnel\n"
+        f"- Kunci proteksi NOINDEX & robots.txt Disallow pada 6 web internal (Router, Bansos, Harness, Terminal, Office, 9Router)\n"
         f"- Jalankan modul Claude-BugHunter untuk verifikasi keamanan defensif (SQLi, SSRF, IDOR, .env leak)\n"
-        f"- Pengecekan stabilitas Cloudflare Zero Trust Ingress Tunnel (Port 7681 & 7682)\n"
+        f"- Pengecekan stabilitas Cloudflare Ingress Tunnel (Port 7681 & 7682)\n"
         f"- Pembersihan cache dan log sistem PRoot Linux berkala agar storage lega"
     )
     await send_tg_message(BOT_TOKENS['otter834_bot'], GROUP_CHAT_ID, otter_plan)
@@ -573,10 +583,10 @@ async def run_morning_standup():
         f"✨ [STANDUP PAGI 08:30 WITA - RENCANA PROYEK IT & RISET]\n"
         f"Pelapor: Noura Studio AI (Project Director)\n\n"
         f"Target & Rencana Kerja Noura Hari Ini:\n"
-        f"- Triage pesanan jasa IT & konsultasi teknis Jokicoding AI\n"
+        f"- Eksekusi 100% Agentic SEO & AEO untuk 5 Website Publik: OpenPlag, OpenJurnal, OpenJob, OpenStalker, OpenQRIS\n"
         f"- Terapkan 9 Tuas Humanize AI pada naskah OpenPlag.id agar lolos Turnitin & GPTZero\n"
         f"- Pemutakhiran repositori sitasi jurnal ilmiah di OpenJurnal.id\n"
-        f"- Monitoring delivery modul kode agar selesai tepat waktu sesuai standar Bu Anisa"
+        f"- Sinkronisasi katalog layanan software house & joki coding Noura Studio"
     )
     await send_tg_message(BOT_TOKENS['noura_chat_bot'], GROUP_CHAT_ID, noura_plan)
     log_event('All Bots', 'morning_standup_done', 'Seluruh 4 bot telah memaparkan rencana kerja harian di grup.')
@@ -702,8 +712,8 @@ async def continuous_autonomous_worker():
             # 3. Nadia CS mengecek log transaksi kasir & OpenWA WhatsApp
             log_event('Nadia CS', 'ledger_sync', f"OpenWA Gateway 0851-5513-3070 online. Sinkronisasi kasir aktif pada {now_str}.")
 
-            # 4. Noura Studio memvalidasi antrean riset & 9 Tuas Humanize AI pada 11 web
-            log_event('Noura Studio', 'task_pipeline', "Optimasi SEO/AEO 11 website Jokicoding & sitasi OpenJurnal bersih dan optimal.")
+            # 4. Noura Studio memvalidasi antrean riset & 9 Tuas Humanize AI pada 5 web publik
+            log_event('Noura Studio', 'task_pipeline', "Optimasi SEO/AEO 5 website publik komersial & proteksi NOINDEX 6 web internal berjalan sempurna.")
 
         except Exception as e:
             print(f"[Autonomous Worker Error] {e}")
