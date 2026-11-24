@@ -248,52 +248,91 @@
             background: #000000;
         }
 
-        /* Bottom Dock (Iconic TinyCore wbar) */
+        /* Bottom Dock (Iconic TinyCore wbar with Labels) */
         .dock-container {
             position: absolute;
-            bottom: 14px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--tc-dock-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             padding: 8px 14px;
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             z-index: 9999;
+            max-width: calc(100vw - 20px);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
         .dock-item {
             position: relative;
-            width: 46px;
-            height: 46px;
+            min-width: 60px;
+            height: 56px;
+            padding: 5px 4px 4px 4px;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.12);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: #e2e8f0;
-            font-size: 20px;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+            user-select: none;
+            text-decoration: none;
         }
 
-        .dock-item:hover {
-            transform: translateY(-8px) scale(1.22);
+        .dock-icon {
+            font-size: 19px;
+            line-height: 1;
+            margin-bottom: 3px;
+            transition: transform 0.2s ease;
+        }
+
+        .dock-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-align: center;
+            white-space: nowrap;
+            line-height: 1.1;
+            letter-spacing: -0.2px;
+            max-width: 56px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.2s ease;
+        }
+
+        .dock-item:hover, .dock-item:focus-visible {
+            transform: translateY(-8px) scale(1.15);
             background: rgba(56, 189, 248, 0.25);
             border-color: #38bdf8;
             color: #ffffff;
-            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.35);
+            box-shadow: 0 10px 22px rgba(56, 189, 248, 0.4);
+            outline: none;
+        }
+
+        .dock-item:hover .dock-label, .dock-item:focus-visible .dock-label {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.9);
+        }
+
+        .dock-item:hover .dock-icon, .dock-item:focus-visible .dock-icon {
+            transform: scale(1.1);
         }
 
         .dock-tooltip {
             position: absolute;
-            top: -34px;
+            top: -38px;
             background: #0f172a;
             color: #f8fafc;
             font-size: 11px;
@@ -306,9 +345,11 @@
             pointer-events: none;
             transform: translateY(6px);
             transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
         }
 
-        .dock-item:hover .dock-tooltip {
+        .dock-item:hover .dock-tooltip, .dock-item:focus-visible .dock-tooltip {
             opacity: 1;
             transform: translateY(0);
         }
@@ -994,15 +1035,24 @@
         @media (max-width: 768px) {
             .dock-container {
                 bottom: 8px;
-                padding: 6px 10px;
-                gap: 8px;
+                padding: 6px 8px;
+                gap: 6px;
                 border-radius: 16px;
             }
             .dock-item {
-                width: 38px;
-                height: 38px;
-                font-size: 16px;
+                min-width: 48px;
+                height: 48px;
+                padding: 3px 2px;
                 border-radius: 10px;
+            }
+            .dock-icon {
+                font-size: 16px;
+                margin-bottom: 2px;
+            }
+            .dock-label {
+                font-size: 8px;
+                letter-spacing: -0.3px;
+                max-width: 46px;
             }
         }
 
@@ -1299,47 +1349,58 @@
     <div class="dock-container">
         <!-- JokiCoding AI Dock Item -->
         <div class="dock-item" onclick="toggleWindow('win-antigravity')" style="border-color: #a855f7; box-shadow: 0 0 14px rgba(168, 85, 247, 0.45); background: rgba(168, 85, 247, 0.2);">
-            <i class="fa-solid fa-atom" style="color: #c084fc;"></i>
+            <i class="fa-solid fa-atom dock-icon" style="color: #c084fc;"></i>
+            <span class="dock-label">JokiCoding</span>
             <div class="dock-tooltip">JokiCoding AI Agent (Code &amp; System Manager)</div>
         </div>
         <div class="dock-item" onclick="toggleWindow('win-term')">
-            <i class="fa-solid fa-terminal" style="color: #38bdf8;"></i>
+            <i class="fa-solid fa-terminal dock-icon" style="color: #38bdf8;"></i>
+            <span class="dock-label">Terminal</span>
             <div class="dock-tooltip">Terminal (aterm)</div>
         </div>
         <div class="dock-item" onclick="toggleWindow('win-files'); loadFiles('/var/www');">
-            <i class="fa-solid fa-folder-tree" style="color: #fbbf24;"></i>
-            <div class="dock-tooltip">File Manager</div>
+            <i class="fa-solid fa-folder-tree dock-icon" style="color: #fbbf24;"></i>
+            <span class="dock-label">Files</span>
+            <div class="dock-tooltip">File Manager (/var/www)</div>
         </div>
         <div class="dock-item" onclick="toggleWindow('win-sys'); loadSysInfo();">
-            <i class="fa-solid fa-chart-pie" style="color: #34d399;"></i>
-            <div class="dock-tooltip">System Monitor</div>
+            <i class="fa-solid fa-chart-pie dock-icon" style="color: #34d399;"></i>
+            <span class="dock-label">Monitor</span>
+            <div class="dock-tooltip">System Monitor &amp; Services</div>
         </div>
         <div class="dock-item" onclick="toggleWindow('win-gopay')">
-            <i class="fa-solid fa-qrcode" style="color: #60a5fa;"></i>
+            <i class="fa-solid fa-qrcode dock-icon" style="color: #60a5fa;"></i>
+            <span class="dock-label">GoPay</span>
             <div class="dock-tooltip">GoPay QRIS Bit &amp; Bean</div>
         </div>
         <div class="dock-item" onclick="window.open('https://openqris.jokicoding.web.id', '_blank')">
-            <i class="fa-solid fa-bolt" style="color: #818cf8;"></i>
+            <i class="fa-solid fa-bolt dock-icon" style="color: #818cf8;"></i>
+            <span class="dock-label">OpenQRIS</span>
             <div class="dock-tooltip">OpenQRIS Gateway (0% MDR)</div>
         </div>
         <div class="dock-item" onclick="window.open('https://openjob.jokicoding.web.id', '_blank')">
-            <i class="fa-solid fa-briefcase" style="color: #fb923c;"></i>
+            <i class="fa-solid fa-briefcase dock-icon" style="color: #fb923c;"></i>
+            <span class="dock-label">OpenJob</span>
             <div class="dock-tooltip">OpenJob.id Karir &amp; Magang</div>
         </div>
         <div class="dock-item" onclick="window.open('https://openjurnal.jokicoding.web.id', '_blank')">
-            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8;"></i>
+            <i class="fa-solid fa-graduation-cap dock-icon" style="color: #38bdf8;"></i>
+            <span class="dock-label">OpenJurnal</span>
             <div class="dock-tooltip">OpenJurnal.id Portal Riset</div>
         </div>
         <div class="dock-item" onclick="window.open('https://openplag.jokicoding.web.id', '_blank')">
-            <i class="fa-solid fa-book-open" style="color: #a78bfa;"></i>
-            <div class="dock-tooltip">OpenPlag.id Web</div>
+            <i class="fa-solid fa-book-open dock-icon" style="color: #a78bfa;"></i>
+            <span class="dock-label">OpenPlag</span>
+            <div class="dock-tooltip">OpenPlag.id Cek Plagiarisme</div>
         </div>
         <div class="dock-item" onclick="window.open('https://openstalker.jokicoding.web.id', '_blank')">
-            <i class="fa-solid fa-user-secret" style="color: #34d399;"></i>
-            <div class="dock-tooltip">OpenStalker.id (OSINT &amp; Identity Intel)</div>
+            <i class="fa-solid fa-user-secret dock-icon" style="color: #34d399;"></i>
+            <span class="dock-label">OpenStalker</span>
+            <div class="dock-tooltip">OpenStalker.id (OSINT &amp; Intel)</div>
         </div>
         <div class="dock-item" onclick="window.open('https://bansos.jokicoding.web.id', '_blank')">
-            <i class="fa-solid fa-robot" style="color: #f472b6;"></i>
+            <i class="fa-solid fa-robot dock-icon" style="color: #f472b6;"></i>
+            <span class="dock-label">Bansos AI</span>
             <div class="dock-tooltip">Bansos AI Gateway</div>
         </div>
     </div>
